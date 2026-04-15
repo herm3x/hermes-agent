@@ -56,7 +56,7 @@ function buildProposalCard(
   const noProb = 100 - yesProb;
   const endTime = formatEndTime(proposal.end_time);
   const isTestnet = currentConfig.useTestnet;
-  const tags = proposal.tags.map(t => `<span class="hermex-tag">${t}</span>`).join('');
+  const tags = proposal.tags.map(t => `<span class="hermex-tag">${escapeHtml(t)}</span>`).join('');
 
   const marketInfo = existingMarket
     ? `<div class="hermex-market-info">
@@ -80,8 +80,8 @@ function buildProposalCard(
       </div>
     </div>
     <div class="hermex-card-body">
-      <h3 class="hermex-title">${proposal.title}</h3>
-      <p class="hermex-desc">${proposal.description}</p>
+      <h3 class="hermex-title">${escapeHtml(proposal.title)}</h3>
+      <p class="hermex-desc">${escapeHtml(proposal.description)}</p>
       <div class="hermex-outcomes">
         <div class="hermex-outcome hermex-yes">
           <span class="hermex-outcome-label">Yes</span>
@@ -126,7 +126,7 @@ function buildErrorCard(message: string): string {
       <span class="hermex-badge hermex-error-badge">Error</span>
     </div>
     <div class="hermex-card-body hermex-error-body">
-      <p>${message}</p>
+      <p>${escapeHtml(message)}</p>
     </div>
   `;
 }
@@ -177,4 +177,10 @@ function formatNumber(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
   if (n >= 1_000) return (n / 1_000).toFixed(1) + 'k';
   return n.toString();
+}
+
+function escapeHtml(str: string): string {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
 }

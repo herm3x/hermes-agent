@@ -61,15 +61,14 @@ export const DEFAULT_CONFIG: HermexConfig = {
 };
 
 export const TOP_KOLS: string[] = [
-  'elonmusk', 'VitalikButerin', 'realDonaldTrump', 'caboriosdev',
+  'elonmusk', 'VitalikButerin', 'realDonaldTrump', 'POTUS',
   'cz_binance', 'brian_armstrong', 'justinsuntron', 'aantonop',
-  'APompliano', 'balaborios', 'IvanOnTech', 'TheCryptoDog',
-  'WhalePanda', 'NickSzabo4', 'adam3us', 'PeterSchiff',
-  'naval', 'pmarca', 'sama', 'jack',
-  'GaryGensler', 'RichardHeartWin', 'CathieDWood', 'michael_saylor',
-  'BarrySilbert', 'cdixon', 'laurashin', 'ErikVoorhees',
-  'CharlieShrem', 'rogaborios', 'TylerWinklevoss', 'cameron',
-  'hosaborios', 'jessepollak', 'sassal0x', 'Rewkang',
+  'APompliano', 'IvanOnTech', 'PeterSchiff', 'naval',
+  'pmarca', 'sama', 'jack', 'saylor',
+  'GaryGensler', 'CathieDWood', 'BarrySilbert', 'cdixon',
+  'laurashin', 'ErikVoorhees', 'TylerWinklevoss', 'cameron',
+  'jessepollak', 'DeItaone', 'tier10k', 'WatcherGuru',
+  'unusual_whales', 'RaoulGMI', 'whale_alert', 'documentingbtc',
 ];
 
 export type MessageType =
