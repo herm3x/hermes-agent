@@ -1,0 +1,19 @@
+{
+  "name": "hermex",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Hermex — Inline prediction markets for X, powered by Hermes Agent + Predict.fun",
+  "workspaces": [
+    "chrome-extension",
+    "backend"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:ext": "npm run dev --workspace=chrome-extension",
+    "build:backend": "npm run build --workspace=backend",
+    "build:ext": "npm run build --workspace=chrome-extension",
+    "build": "npm run build:backend && npm run build:ext"
+  },
+  "author": "Hermex",
+  "license": "MIT"
+}
