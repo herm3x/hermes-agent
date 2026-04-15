@@ -5,7 +5,7 @@ const BASE_URL = config.predictFun.apiUrl;
 
 export async function searchMarkets(query: string): Promise<PredictFunMarket | null> {
   try {
-    const url = `${BASE_URL}/v1/markets?search=${encodeURIComponent(query)}&limit=5&status=active`;
+    const url = `${BASE_URL}/v1/markets?limit=50`;
 
     const headers: Record<string, string> = {
       'Accept': 'application/json',
@@ -21,14 +21,13 @@ export async function searchMarkets(query: string): Promise<PredictFunMarket | n
       return null;
     }
 
-    const data = await response.json();
-    const markets = data.markets || data.data || data;
+    const body = await response.json() as { success?: boolean; data?: any[] };
 
-    if (!Array.isArray(markets) || markets.length === 0) {
+    if (!body.success || !Array.isArray(body.data) || body.data.length === 0) {
       return null;
     }
 
-    const best = findBestMatch(markets, query);
+    const best = findBestMatch(body.data, query);
     if (!best) return null;
 
     return normalizeMarket(best);
@@ -40,17 +39,22 @@ export async function searchMarkets(query: string): Promise<PredictFunMarket | n
 
 function findBestMatch(markets: any[], query: string): any | null {
   const queryLower = query.toLowerCase();
-  const queryWords = queryLower.split(/\s+/).filter(w => w.length > 3);
+  const queryWords = queryLower.split(/\s+/).filter(w => w.length > 2);
 
   let bestMarket = null;
   let bestScore = 0;
 
   for (const market of markets) {
-    const title = (market.title || market.question || '').toLowerCase();
-    let score = 0;
+    if (market.tradingStatus !== 'OPEN') continue;
 
+    const title = (market.title || '').toLowerCase();
+    const question = (market.question || '').toLowerCase();
+    const description = (market.description || '').toLowerCase();
+    const searchable = `${title} ${question} ${description}`;
+
+    let score = 0;
     for (const word of queryWords) {
-      if (title.includes(word)) score++;
+      if (searchable.includes(word)) score++;
     }
 
     const similarity = score / Math.max(queryWords.length, 1);
@@ -65,22 +69,22 @@ function findBestMatch(markets: any[], query: string): any | null {
 
 function normalizeMarket(raw: any): PredictFunMarket {
   const outcomes = (raw.outcomes || []).map((o: any) => ({
-    name: o.name || o.title || 'Unknown',
+    name: o.name || 'Unknown',
     probability: o.probability || o.price || 0.5,
   }));
 
-  const isTestnet = BASE_URL.includes('testnet');
-  const baseWebUrl = isTestnet ? 'https://testnet.predict.fun' : 'https://predict.fun';
+  const slug = raw.categorySlug || '';
+  const marketUrl = `https://predict.fun/${slug}`;
 
   return {
-    id: raw.id || raw.market_id || '',
-    title: raw.title || raw.question || '',
+    id: String(raw.id || ''),
+    title: raw.question || raw.title || '',
     description: raw.description || '',
     outcomes,
-    volume: raw.volume || raw.total_volume || 0,
-    liquidity: raw.liquidity || raw.total_liquidity || 0,
-    endDate: raw.end_date || raw.close_time || '',
-    url: `${baseWebUrl}/market/${raw.id || raw.market_id}`,
+    volume: raw.stats?.volume ?? 0,
+    liquidity: raw.stats?.liquidity ?? 0,
+    endDate: raw.boostEndsAt || raw.createdAt || '',
+    url: marketUrl,
   };
 }
 

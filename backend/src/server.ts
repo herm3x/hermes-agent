@@ -3,15 +3,18 @@ import cors from 'cors';
 import { config } from './config.js';
 import proposalRoutes from './routes/proposal.js';
 
-const app = express();
+const app: ReturnType<typeof express> = express();
 
 app.use(cors({
-  origin: [
-    'chrome-extension://*',
-    'https://x.com',
-    'https://twitter.com',
-    'http://localhost:*',
-  ],
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    const allowed =
+      origin.startsWith('chrome-extension://') ||
+      origin === 'https://x.com' ||
+      origin === 'https://twitter.com' ||
+      origin.startsWith('http://localhost');
+    callback(null, allowed);
+  },
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));

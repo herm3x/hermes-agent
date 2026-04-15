@@ -1,15 +1,18 @@
 import './styles.css';
 import { extractTweetData, shouldPropose, markProcessed, getTweetElements } from './tweet-detector';
-import { injectLoadingCard, updateCard } from './card-injector';
+import { injectLoadingCard, updateCard, setCardConfig } from './card-injector';
 import { HermexConfig, DEFAULT_CONFIG, TweetData, ProposalCardData } from '../types';
 
 let config: HermexConfig = DEFAULT_CONFIG;
-let isProcessing = false;
+let scanTimer: ReturnType<typeof setTimeout> | null = null;
 
 async function loadConfig(): Promise<void> {
   try {
     const response = await chrome.runtime.sendMessage({ type: 'GET_CONFIG' });
-    if (response?.config) config = response.config;
+    if (response?.config) {
+      config = response.config;
+      setCardConfig(config);
+    }
   } catch {
     /* use defaults */
   }
@@ -49,34 +52,34 @@ async function processTweet(tweet: TweetData): Promise<void> {
 }
 
 function scanFeed(): void {
-  if (!config.enabled || isProcessing) return;
-  isProcessing = true;
+  if (!config.enabled) return;
 
-  try {
-    const tweets = getTweetElements();
-    for (const el of tweets) {
-      const tweet = extractTweetData(el);
-      if (!tweet) continue;
-      if (shouldPropose(tweet, config.kolWhitelist)) {
-        processTweet(tweet);
-      }
+  const tweets = getTweetElements();
+  for (const el of tweets) {
+    const tweet = extractTweetData(el);
+    if (!tweet) continue;
+    if (shouldPropose(tweet, config.kolWhitelist)) {
+      processTweet(tweet);
     }
-  } finally {
-    isProcessing = false;
   }
+}
+
+function debouncedScan(): void {
+  if (scanTimer) clearTimeout(scanTimer);
+  scanTimer = setTimeout(scanFeed, 300);
 }
 
 function startObserver(): void {
   const observer = new MutationObserver((mutations) => {
-    let hasNewTweets = false;
+    let hasNewNodes = false;
     for (const mutation of mutations) {
       if (mutation.addedNodes.length > 0) {
-        hasNewTweets = true;
+        hasNewNodes = true;
         break;
       }
     }
-    if (hasNewTweets) {
-      requestAnimationFrame(scanFeed);
+    if (hasNewNodes) {
+      debouncedScan();
     }
   });
 
@@ -95,6 +98,7 @@ async function init(): Promise<void> {
   chrome.storage.onChanged.addListener((changes) => {
     if (changes.hermexConfig) {
       config = { ...DEFAULT_CONFIG, ...changes.hermexConfig.newValue };
+      setCardConfig(config);
     }
   });
 }

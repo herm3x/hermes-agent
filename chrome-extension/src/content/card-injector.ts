@@ -1,6 +1,11 @@
-import { ProposalCardData, MarketProposal, PredictFunMarket } from '../types';
+import { ProposalCardData, MarketProposal, PredictFunMarket, HermexConfig, DEFAULT_CONFIG } from '../types';
 
 const CARD_ATTR = 'data-hermex-card';
+let currentConfig: HermexConfig = DEFAULT_CONFIG;
+
+export function setCardConfig(config: HermexConfig): void {
+  currentConfig = config;
+}
 
 export function injectLoadingCard(tweetEl: HTMLElement, tweetId: string): void {
   if (tweetEl.querySelector(`[${CARD_ATTR}]`)) return;
@@ -50,7 +55,7 @@ function buildProposalCard(
   const yesProb = Math.round(proposal.initial_probability * 100);
   const noProb = 100 - yesProb;
   const endTime = formatEndTime(proposal.end_time);
-  const isTestnet = true;
+  const isTestnet = currentConfig.useTestnet;
   const tags = proposal.tags.map(t => `<span class="hermex-tag">${t}</span>`).join('');
 
   const marketInfo = existingMarket
@@ -132,8 +137,7 @@ function attachCardListeners(card: HTMLElement, data: ProposalCardData): void {
     if (data.existingMarket) {
       window.open(data.existingMarket.url, '_blank');
     } else {
-      const searchQuery = encodeURIComponent(data.proposal.title);
-      window.open(`https://testnet.predict.fun/search?q=${searchQuery}`, '_blank');
+      window.open('https://predict.fun', '_blank');
     }
   });
 

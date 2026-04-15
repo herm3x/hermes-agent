@@ -41,27 +41,31 @@ function getClient(): OpenAI {
 
 export async function generateProposal(tweet: TweetInput): Promise<MarketProposal> {
   const client = getClient();
-
   const userMessage = buildPrompt(tweet);
 
-  const completion = await client.chat.completions.create({
-    model: config.llm.model,
-    messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: userMessage },
-    ],
-    temperature: 0.7,
-    max_tokens: 500,
-    response_format: { type: 'json_object' },
-  });
+  try {
+    const completion = await client.chat.completions.create({
+      model: config.llm.model,
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: userMessage },
+      ],
+      temperature: 0.7,
+      max_tokens: 500,
+    });
 
-  const content = completion.choices[0]?.message?.content;
-  if (!content) {
-    throw new Error('Empty response from LLM');
+    const content = completion.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error('Empty response from LLM');
+    }
+
+    return parseProposal(content);
+  } catch (err: any) {
+    if (err?.status === 400 && err?.message?.includes('response_format')) {
+      throw err;
+    }
+    throw new Error(`LLM call failed: ${err?.message || 'Unknown error'}`);
   }
-
-  const proposal = parseProposal(content);
-  return proposal;
 }
 
 function buildPrompt(tweet: TweetInput): string {
@@ -78,25 +82,44 @@ function buildPrompt(tweet: TweetInput): string {
     });
   }
 
-  prompt += `\nGenerate a prediction market proposal for this tweet.`;
+  prompt += `\nGenerate a prediction market proposal for this tweet. Respond ONLY with valid JSON.`;
   return prompt;
 }
 
 function parseProposal(raw: string): MarketProposal {
-  const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+  let cleaned = raw.trim();
+
+  const jsonMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (jsonMatch) {
+    cleaned = jsonMatch[1].trim();
+  }
+
+  const braceStart = cleaned.indexOf('{');
+  const braceEnd = cleaned.lastIndexOf('}');
+  if (braceStart !== -1 && braceEnd !== -1 && braceEnd > braceStart) {
+    cleaned = cleaned.substring(braceStart, braceEnd + 1);
+  }
+
   const parsed = JSON.parse(cleaned);
 
   if (!parsed.title || !parsed.outcomes || !parsed.end_time) {
-    throw new Error('Invalid proposal structure: missing required fields');
+    throw new Error('Invalid proposal structure: missing required fields (title, outcomes, end_time)');
+  }
+
+  const endTime = new Date(parsed.end_time);
+  if (isNaN(endTime.getTime())) {
+    const fallback = new Date();
+    fallback.setHours(fallback.getHours() + 24);
+    parsed.end_time = fallback.toISOString();
   }
 
   return {
-    title: parsed.title,
-    description: parsed.description || '',
-    outcomes: parsed.outcomes,
-    resolution_source: parsed.resolution_source || 'Official X posts',
+    title: String(parsed.title),
+    description: String(parsed.description || ''),
+    outcomes: Array.isArray(parsed.outcomes) ? parsed.outcomes.map(String) : ['Yes', 'No'],
+    resolution_source: String(parsed.resolution_source || 'Official X posts'),
     end_time: parsed.end_time,
-    tags: parsed.tags || [],
-    initial_probability: Math.max(0.01, Math.min(0.99, parsed.initial_probability || 0.5)),
+    tags: Array.isArray(parsed.tags) ? parsed.tags.map(String) : [],
+    initial_probability: Math.max(0.01, Math.min(0.99, Number(parsed.initial_probability) || 0.5)),
   };
 }

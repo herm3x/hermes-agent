@@ -35,6 +35,7 @@ module.exports = {
       patterns: [
         { from: 'public', to: '.' },
         { from: 'assets', to: 'assets' },
+        { from: 'src/popup/popup.css', to: 'popup.css' },
       ],
     }),
   ],

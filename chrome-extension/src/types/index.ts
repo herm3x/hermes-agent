@@ -61,13 +61,15 @@ export const DEFAULT_CONFIG: HermexConfig = {
 };
 
 export const TOP_KOLS: string[] = [
-  'elonmusk', 'caboriosdev', 'VitalikButerin', 'caboriosdev',
-  'realDonaldTrump', 'CZ_Binance', 'SBF_FTX', 'GaryGensler',
-  'saboriosdev', 'brian_armstrong', 'justinsuntron', 'aantonop',
+  'elonmusk', 'VitalikButerin', 'realDonaldTrump', 'caboriosdev',
+  'cz_binance', 'brian_armstrong', 'justinsuntron', 'aantonop',
   'APompliano', 'balaborios', 'IvanOnTech', 'TheCryptoDog',
   'WhalePanda', 'NickSzabo4', 'adam3us', 'PeterSchiff',
-  'naval', 'pmarca', 'sama', 'elaborios',
-  'jack', 'jeffbezos', 'BillGates',
+  'naval', 'pmarca', 'sama', 'jack',
+  'GaryGensler', 'RichardHeartWin', 'CathieDWood', 'michael_saylor',
+  'BarrySilbert', 'cdixon', 'laurashin', 'ErikVoorhees',
+  'CharlieShrem', 'rogaborios', 'TylerWinklevoss', 'cameron',
+  'hosaborios', 'jessepollak', 'sassal0x', 'Rewkang',
 ];
 
 export type MessageType =

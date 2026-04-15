@@ -3,7 +3,7 @@ import { generateProposal } from '../services/hermes.js';
 import { searchMarkets } from '../services/predict-fun.js';
 import type { ProposalRequest, ProposalResponse } from '../types/index.js';
 
-const router = Router();
+const router: ReturnType<typeof Router> = Router();
 
 const recentProposals = new Map<string, { proposal: any; timestamp: number }>();
 const DEDUP_WINDOW_MS = 5 * 60 * 1000;
