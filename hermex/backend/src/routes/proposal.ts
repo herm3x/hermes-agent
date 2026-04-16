@@ -190,6 +190,153 @@ router.get('/endpoints', (_req: Request, res: Response) => {
   res.json({ endpoints });
 });
 
+// Live feed markets — seeded from 3 tracked KOLs
+interface FeedMarket {
+  id: string;
+  author: string;
+  handle: string;
+  avatar: string;
+  timestamp: string;
+  tweet: string;
+  tweetUrl: string;
+  question: string;
+  yesPrice: number; // 0..1
+  noPrice: number;  // 0..1
+  volume: number;
+  liquidity: number;
+  traders: number;
+  priceChange: number; // %
+  endDate: string;
+}
+
+const FEED_MARKETS_SEED: FeedMarket[] = [
+  {
+    id: 'teknium-hermes4-q3',
+    author: 'Teknium',
+    handle: 'Teknium',
+    avatar: 'https://unavatar.io/twitter/Teknium',
+    timestamp: '2h',
+    tweet: 'Hermes 4 is coming with major improvements in tool use, agentic reasoning, and native multimodality. Targeting Q3 2026 release.',
+    tweetUrl: 'https://x.com/Teknium',
+    question: 'Will Nous Research release Hermes 4 by Q3 2026?',
+    yesPrice: 0.67,
+    noPrice: 0.33,
+    volume: 142800,
+    liquidity: 48500,
+    traders: 412,
+    priceChange: 4.8,
+    endDate: '2026-09-30',
+  },
+  {
+    id: 'nousresearch-1m-users',
+    author: 'NousResearch',
+    handle: 'NousResearch',
+    avatar: 'https://unavatar.io/twitter/NousResearch',
+    timestamp: '6h',
+    tweet: 'Hermes Agent adoption keeps climbing — the open source path is winning. Proud of the community building on top of it.',
+    tweetUrl: 'https://x.com/NousResearch',
+    question: 'Will Hermes Agent reach 1M monthly active users by end of 2026?',
+    yesPrice: 0.42,
+    noPrice: 0.58,
+    volume: 89200,
+    liquidity: 31400,
+    traders: 287,
+    priceChange: -2.3,
+    endDate: '2026-12-31',
+  },
+  {
+    id: 'cz-bnb-1500',
+    author: 'CZ 🔶 BNB',
+    handle: 'cz_binance',
+    avatar: 'https://unavatar.io/twitter/cz_binance',
+    timestamp: '1h',
+    tweet: 'BNB Chain ecosystem stronger than ever. Builders, keep shipping. The market always follows fundamentals long term.',
+    tweetUrl: 'https://x.com/cz_binance',
+    question: 'Will BNB close above $1,500 by end of Q2 2026?',
+    yesPrice: 0.38,
+    noPrice: 0.62,
+    volume: 508300,
+    liquidity: 124600,
+    traders: 1847,
+    priceChange: 6.1,
+    endDate: '2026-06-30',
+  },
+  {
+    id: 'teknium-405b-benchmark',
+    author: 'Teknium',
+    handle: 'Teknium',
+    avatar: 'https://unavatar.io/twitter/Teknium',
+    timestamp: '11h',
+    tweet: 'Our 405b model is holding its own against closed-source frontier models on reasoning benchmarks. Open weights matter.',
+    tweetUrl: 'https://x.com/Teknium',
+    question: 'Will Hermes 3 405b beat GPT-4o on LMSYS Arena by May 2026?',
+    yesPrice: 0.28,
+    noPrice: 0.72,
+    volume: 67400,
+    liquidity: 22100,
+    traders: 198,
+    priceChange: -1.4,
+    endDate: '2026-05-31',
+  },
+  {
+    id: 'cz-sec-dismissed',
+    author: 'CZ 🔶 BNB',
+    handle: 'cz_binance',
+    avatar: 'https://unavatar.io/twitter/cz_binance',
+    timestamp: '3h',
+    tweet: 'Focus on building, not FUD. Real value compounds. Short-term noise fades.',
+    tweetUrl: 'https://x.com/cz_binance',
+    question: 'Will Binance complete full US regulatory settlement by end of 2026?',
+    yesPrice: 0.71,
+    noPrice: 0.29,
+    volume: 312000,
+    liquidity: 88200,
+    traders: 923,
+    priceChange: 2.7,
+    endDate: '2026-12-31',
+  },
+  {
+    id: 'nous-hermes-agent-v2',
+    author: 'NousResearch',
+    handle: 'NousResearch',
+    avatar: 'https://unavatar.io/twitter/NousResearch',
+    timestamp: '8h',
+    tweet: 'Hermes Agent v2 will ship with native browser use, stronger planning, and a bunch of user-requested integrations.',
+    tweetUrl: 'https://x.com/NousResearch',
+    question: 'Will Hermes Agent v2 ship before July 2026?',
+    yesPrice: 0.54,
+    noPrice: 0.46,
+    volume: 51800,
+    liquidity: 18700,
+    traders: 164,
+    priceChange: 1.9,
+    endDate: '2026-07-01',
+  },
+];
+
+function jitterMarkets(seed: FeedMarket[]): FeedMarket[] {
+  return seed.map(m => {
+    const delta = (Math.random() - 0.5) * 0.02; // ±1% price drift
+    const yp = Math.max(0.02, Math.min(0.98, +(m.yesPrice + delta).toFixed(2)));
+    const np = +(1 - yp).toFixed(2);
+    const volBump = Math.floor(Math.random() * 300);
+    const traderBump = Math.floor(Math.random() * 4);
+    return {
+      ...m,
+      yesPrice: yp,
+      noPrice: np,
+      volume: m.volume + volBump,
+      traders: m.traders + traderBump,
+      priceChange: +((m.priceChange || 0) + (Math.random() - 0.5) * 0.4).toFixed(2),
+    };
+  });
+}
+
+router.get('/feed-markets', (_req: Request, res: Response) => {
+  const markets = jitterMarkets(FEED_MARKETS_SEED);
+  res.json({ markets, total: markets.length, updatedAt: new Date().toISOString() });
+});
+
 router.get('/files', (req: Request, res: Response) => {
   const dir = (req.query.dir as string) || '.';
   const result = getDirectoryListing(dir);

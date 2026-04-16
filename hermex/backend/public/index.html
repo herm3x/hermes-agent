@@ -166,77 +166,74 @@
 
     <!-- CENTER -->
     <main class="center-area">
-      <!-- System Overview Strip -->
-      <div class="panel system-strip">
-        <div class="strip-row">
-          <!-- CPU -->
-          <div class="strip-card">
-            <div class="strip-top">
-              <span class="strip-icon cpu-icon">⬡</span>
-              <span class="strip-label">CPU</span>
+      <!-- Live Prediction Markets -->
+      <div class="panel markets-panel">
+        <div class="panel-header">
+          <span><span class="ph-icon">✦</span> LIVE MARKETS
+            <span class="markets-sub">from tracked KOLs · on-chain betting via Binance Wallet</span>
+          </span>
+          <span class="header-badges">
+            <span class="badge green">● LIVE</span>
+            <span class="badge" id="marketsCount">0</span>
+          </span>
+        </div>
+        <div class="markets-row" id="marketsRow">
+          <div class="market-skeleton"><div class="sk-shimmer"></div></div>
+          <div class="market-skeleton"><div class="sk-shimmer"></div></div>
+          <div class="market-skeleton"><div class="sk-shimmer"></div></div>
+        </div>
+      </div>
+
+      <!-- Bet Modal -->
+      <div class="modal-overlay" id="betModal">
+        <div class="modal bet-modal">
+          <button class="modal-close" id="betModalClose" aria-label="Close">×</button>
+          <div class="bet-header">
+            <div class="bet-header-side" id="betSideLabel">YES</div>
+            <div class="bet-kol">
+              <img id="betAvatar" src="" alt="">
+              <div class="bet-kol-text">
+                <div class="bet-kol-handle" id="betHandle">@username</div>
+                <div class="bet-kol-tweet" id="betTweet"></div>
+              </div>
             </div>
-            <div class="strip-value" id="cpuVal">—</div>
-            <div class="strip-bar"><div class="strip-fill cpu" id="cpuBar" style="width:0%"></div></div>
-            <div class="strip-sub" id="cpuSub">loading...</div>
           </div>
-          <!-- MEM -->
-          <div class="strip-card">
-            <div class="strip-top">
-              <span class="strip-icon mem-icon">◈</span>
-              <span class="strip-label">MEM</span>
+          <div class="bet-question" id="betQuestion"></div>
+
+          <div class="bet-side-buttons">
+            <button class="bet-side-btn yes" id="betBtnYes">
+              <span class="bs-label">YES</span>
+              <span class="bs-price" id="bsYesPrice">0¢</span>
+            </button>
+            <button class="bet-side-btn no" id="betBtnNo">
+              <span class="bs-label">NO</span>
+              <span class="bs-price" id="bsNoPrice">0¢</span>
+            </button>
+          </div>
+
+          <div class="bet-amount-row">
+            <label class="bet-amount-label">AMOUNT (USDT)</label>
+            <div class="bet-amount-wrap">
+              <input type="number" class="bet-amount-input" id="betAmount" value="10" min="1" step="1">
+              <div class="bet-amount-presets">
+                <button data-amount="10">10</button>
+                <button data-amount="50">50</button>
+                <button data-amount="100">100</button>
+                <button data-amount="500">500</button>
+              </div>
             </div>
-            <div class="strip-value" id="memVal">—</div>
-            <div class="strip-bar"><div class="strip-fill mem" id="memBar" style="width:0%"></div></div>
-            <div class="strip-sub" id="memSub">loading...</div>
           </div>
-          <!-- DISK -->
-          <div class="strip-card">
-            <div class="strip-top">
-              <span class="strip-icon disk-icon">◇</span>
-              <span class="strip-label">DISK</span>
-            </div>
-            <div class="strip-value" id="diskVal">—</div>
-            <div class="strip-bar"><div class="strip-fill disk" id="diskBar" style="width:0%"></div></div>
-            <div class="strip-sub" id="diskSub">loading...</div>
+
+          <div class="bet-summary">
+            <div class="bet-sum-row"><span>To win</span><span class="bet-sum-val" id="betToWin">—</span></div>
+            <div class="bet-sum-row"><span>Profit</span><span class="bet-sum-val accent" id="betProfit">—</span></div>
+            <div class="bet-sum-row dim"><span>Gas estimate</span><span class="bet-sum-val">~$0.08</span></div>
           </div>
-          <!-- UPTIME -->
-          <div class="strip-card">
-            <div class="strip-top">
-              <span class="strip-icon up-icon">△</span>
-              <span class="strip-label">UPTIME</span>
-            </div>
-            <div class="strip-value uptime" id="uptimeVal">—</div>
-            <div class="strip-sub" id="uptimeSub">hermex process</div>
-          </div>
-          <!-- divider -->
-          <div class="strip-divider"></div>
-          <!-- REQUESTS -->
-          <div class="strip-card">
-            <div class="strip-top">
-              <span class="strip-icon req-icon">▸</span>
-              <span class="strip-label">REQUESTS</span>
-            </div>
-            <div class="strip-value" id="reqCount">0</div>
-            <div class="strip-sub">total api calls</div>
-          </div>
-          <!-- PROPOSALS -->
-          <div class="strip-card">
-            <div class="strip-top">
-              <span class="strip-icon prop-icon">✧</span>
-              <span class="strip-label">PROPOSALS</span>
-            </div>
-            <div class="strip-value" id="proposalCount">0</div>
-            <div class="strip-sub">llm generated</div>
-          </div>
-          <!-- LLM -->
-          <div class="strip-card">
-            <div class="strip-top">
-              <span class="strip-icon llm-icon">◉</span>
-              <span class="strip-label">LLM</span>
-            </div>
-            <div class="strip-value" id="llmCallCount">0</div>
-            <div class="strip-sub">hermes-3 calls</div>
-          </div>
+
+          <button class="bet-confirm" id="betConfirm">
+            <svg viewBox="0 0 126.61 126.61" width="14" height="14" fill="currentColor"><g><path d="M38.73,53.2l24.59-24.58,24.6,24.6,14.3-14.31L63.32,0,24.42,38.9L38.73,53.2z"/><polygon points="0,63.31 14.3,49 28.6,63.3 14.3,77.61"/><path d="M38.73,73.41l24.59,24.59,24.6-24.6,14.31,14.29l-38.9,38.91L24.42,87.71l-0.01-0.01L38.73,73.41z"/><polygon points="98.01,63.31 112.31,49 126.61,63.31 112.31,77.61"/><path d="M77.83,63.3h0.01L63.32,48.79L52.59,59.52l-1.24,1.23l-2.54,2.54l-0.02,0.02l0.02,0.02l14.51,14.5l14.51-14.5l0.01-0.01L77.83,63.3z"/></g></svg>
+            <span id="betConfirmLabel">CONNECT BINANCE TO BET</span>
+          </button>
         </div>
       </div>
 

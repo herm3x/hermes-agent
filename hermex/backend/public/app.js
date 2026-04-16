@@ -58,22 +58,25 @@
       const res = await fetch(`${API}/system`);
       const d = await res.json();
 
-      document.getElementById('cpuVal').textContent = d.cpu.load.toFixed(2);
-      document.getElementById('cpuSub').textContent = `${d.cpu.cores} cores — ${d.cpu.model.substring(0, 30)}`;
-      document.getElementById('cpuBar').style.width = Math.min(100, d.cpu.load * 100) + '%';
+      const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      const setWidth = (id, val) => { const el = document.getElementById(id); if (el) el.style.width = val; };
 
-      document.getElementById('memVal').textContent = d.memory.percent + '%';
-      document.getElementById('memSub').textContent = `${d.memory.used} / ${d.memory.total}`;
-      document.getElementById('memBar').style.width = d.memory.percent + '%';
+      setText('cpuVal', d.cpu.load.toFixed(2));
+      setText('cpuSub', `${d.cpu.cores} cores — ${d.cpu.model.substring(0, 30)}`);
+      setWidth('cpuBar', Math.min(100, d.cpu.load * 100) + '%');
 
-      document.getElementById('diskVal').textContent = d.disk.percent + '%';
-      document.getElementById('diskSub').textContent = `${d.disk.used} / ${d.disk.total}`;
-      document.getElementById('diskBar').style.width = d.disk.percent + '%';
+      setText('memVal', d.memory.percent + '%');
+      setText('memSub', `${d.memory.used} / ${d.memory.total}`);
+      setWidth('memBar', d.memory.percent + '%');
 
-      document.getElementById('uptimeVal').textContent = d.uptime.formatted;
-      document.getElementById('infoOS').textContent = d.platform;
-      document.getElementById('infoCPUModel').textContent = d.cpu.model.substring(0, 40);
-      document.getElementById('infoNode').textContent = `Bun ${d.nodeVersion}`;
+      setText('diskVal', d.disk.percent + '%');
+      setText('diskSub', `${d.disk.used} / ${d.disk.total}`);
+      setWidth('diskBar', d.disk.percent + '%');
+
+      setText('uptimeVal', d.uptime.formatted);
+      setText('infoOS', d.platform);
+      setText('infoCPUModel', d.cpu.model.substring(0, 40));
+      setText('infoNode', `Bun ${d.nodeVersion}`);
     } catch (e) {
       console.error('System fetch failed:', e);
     }
@@ -301,6 +304,196 @@
       return `<div class="session-item"><span class="session-icon">✧</span><div><div class="session-title">${esc(p.title || 'Untitled')}</div><div class="session-sub">${esc(tags)}</div></div></div>`;
     }).join('');
   }
+
+  // ──── Live Feed Markets ────
+  const marketsRow = document.getElementById('marketsRow');
+  const marketsCountEl = document.getElementById('marketsCount');
+
+  function fmtUSD(n) {
+    if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(1) + 'M';
+    if (n >= 1_000) return '$' + (n / 1_000).toFixed(1) + 'k';
+    return '$' + n;
+  }
+  function fmtNum(n) {
+    if (n >= 1_000) return (n / 1_000).toFixed(1) + 'k';
+    return String(n);
+  }
+  function pctLabel(p) { return Math.round(p * 100) + '¢'; }
+
+  function avatarHTML(m) {
+    const initial = (m.author || '?').trim().charAt(0).toUpperCase();
+    const safe = esc(m.avatar);
+    return `<div class="mk-avatar-wrap"><img class="mk-avatar" src="${safe}" alt="${esc(m.author)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="mk-avatar-fallback">${esc(initial)}</div></div>`;
+  }
+
+  let currentMarkets = [];
+  let activeBetMarket = null;
+  let activeBetSide = 'YES';
+
+  function renderMarkets(markets) {
+    if (!marketsRow) return;
+    currentMarkets = markets;
+    if (marketsCountEl) marketsCountEl.textContent = markets.length;
+    if (!markets.length) {
+      marketsRow.innerHTML = '<div class="markets-empty">No live markets</div>';
+      return;
+    }
+    marketsRow.innerHTML = markets.map(m => {
+      const yesPct = Math.round(m.yesPrice * 100);
+      const noPct = 100 - yesPct;
+      const chg = m.priceChange || 0;
+      const chgCls = chg >= 0 ? 'up' : 'down';
+      const chgArrow = chg >= 0 ? '▲' : '▼';
+      return `
+        <div class="market-card" data-id="${esc(m.id)}">
+          <div class="mk-head">
+            ${avatarHTML(m)}
+            <div class="mk-author">
+              <div class="mk-handle">@${esc(m.handle)}</div>
+              <div class="mk-meta"><span class="mk-live-dot"></span>${esc(m.timestamp)} · ${fmtUSD(m.volume)} vol</div>
+            </div>
+            <div class="mk-change ${chgCls}">${chgArrow} ${Math.abs(chg).toFixed(1)}%</div>
+          </div>
+          <div class="mk-tweet">${esc(m.tweet)}</div>
+          <div class="mk-question">${esc(m.question)}</div>
+          <div class="mk-bars">
+            <div class="mk-bar yes" style="--pct:${yesPct}%">
+              <span class="mk-bar-label">YES</span>
+              <span class="mk-bar-price">${pctLabel(m.yesPrice)}</span>
+            </div>
+            <div class="mk-bar no" style="--pct:${noPct}%">
+              <span class="mk-bar-label">NO</span>
+              <span class="mk-bar-price">${pctLabel(m.noPrice)}</span>
+            </div>
+          </div>
+          <div class="mk-actions">
+            <button class="mk-btn yes" data-side="YES">BUY YES ${pctLabel(m.yesPrice)}</button>
+            <button class="mk-btn no" data-side="NO">BUY NO ${pctLabel(m.noPrice)}</button>
+          </div>
+          <div class="mk-footer">
+            <span><span class="mkf-dot"></span>${fmtNum(m.traders)} traders</span>
+            <span>Liq ${fmtUSD(m.liquidity)}</span>
+            <span>Ends ${esc(m.endDate)}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    marketsRow.querySelectorAll('.market-card').forEach(card => {
+      card.querySelectorAll('.mk-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const side = btn.dataset.side;
+          const id = card.dataset.id;
+          const m = currentMarkets.find(x => x.id === id);
+          if (m) openBetModal(m, side);
+        });
+      });
+    });
+  }
+
+  async function fetchFeedMarkets() {
+    try {
+      const res = await fetch(`${API}/feed-markets`);
+      const d = await res.json();
+      renderMarkets(d.markets || []);
+    } catch (e) {
+      console.error('Feed markets fetch failed:', e);
+      if (marketsRow) marketsRow.innerHTML = '<div class="markets-empty error">Failed to load markets</div>';
+    }
+  }
+  fetchFeedMarkets();
+  setInterval(fetchFeedMarkets, 8000);
+
+  // ──── Bet Modal ────
+  const betModal = document.getElementById('betModal');
+  const betModalClose = document.getElementById('betModalClose');
+  const betHandle = document.getElementById('betHandle');
+  const betAvatar = document.getElementById('betAvatar');
+  const betTweet = document.getElementById('betTweet');
+  const betQuestion = document.getElementById('betQuestion');
+  const betSideLabel = document.getElementById('betSideLabel');
+  const betBtnYes = document.getElementById('betBtnYes');
+  const betBtnNo = document.getElementById('betBtnNo');
+  const bsYesPrice = document.getElementById('bsYesPrice');
+  const bsNoPrice = document.getElementById('bsNoPrice');
+  const betAmountInput = document.getElementById('betAmount');
+  const betToWin = document.getElementById('betToWin');
+  const betProfit = document.getElementById('betProfit');
+  const betConfirm = document.getElementById('betConfirm');
+  const betConfirmLabel = document.getElementById('betConfirmLabel');
+
+  function updateBetSummary() {
+    if (!activeBetMarket) return;
+    const amt = parseFloat(betAmountInput.value) || 0;
+    const price = activeBetSide === 'YES' ? activeBetMarket.yesPrice : activeBetMarket.noPrice;
+    if (!price || price <= 0) { betToWin.textContent = '—'; betProfit.textContent = '—'; return; }
+    const shares = amt / price;
+    const toWin = shares;
+    const profit = toWin - amt;
+    betToWin.textContent = '$' + toWin.toFixed(2);
+    betProfit.textContent = (profit >= 0 ? '+$' : '-$') + Math.abs(profit).toFixed(2);
+
+    const connected = btnBinance && btnBinance.classList.contains('connected');
+    if (betConfirmLabel) {
+      betConfirmLabel.textContent = connected
+        ? `BUY ${activeBetSide} · $${amt.toFixed(0)}`
+        : 'CONNECT BINANCE TO BET';
+    }
+  }
+
+  function setBetSide(side) {
+    activeBetSide = side;
+    if (betSideLabel) {
+      betSideLabel.textContent = side;
+      betSideLabel.className = 'bet-header-side ' + (side === 'YES' ? 'yes' : 'no');
+    }
+    if (betBtnYes) betBtnYes.classList.toggle('active', side === 'YES');
+    if (betBtnNo) betBtnNo.classList.toggle('active', side === 'NO');
+    updateBetSummary();
+  }
+
+  function openBetModal(market, side) {
+    activeBetMarket = market;
+    if (betHandle) betHandle.textContent = '@' + market.handle;
+    if (betAvatar) betAvatar.src = market.avatar;
+    if (betTweet) betTweet.textContent = market.tweet;
+    if (betQuestion) betQuestion.textContent = market.question;
+    if (bsYesPrice) bsYesPrice.textContent = pctLabel(market.yesPrice);
+    if (bsNoPrice) bsNoPrice.textContent = pctLabel(market.noPrice);
+    setBetSide(side || 'YES');
+    if (betModal) betModal.classList.add('open');
+  }
+  function closeBetModal() { if (betModal) betModal.classList.remove('open'); }
+
+  if (betModalClose) betModalClose.addEventListener('click', closeBetModal);
+  if (betModal) betModal.addEventListener('click', (e) => { if (e.target === betModal) closeBetModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeBetModal(); });
+
+  if (betBtnYes) betBtnYes.addEventListener('click', () => setBetSide('YES'));
+  if (betBtnNo) betBtnNo.addEventListener('click', () => setBetSide('NO'));
+  if (betAmountInput) betAmountInput.addEventListener('input', updateBetSummary);
+  document.querySelectorAll('.bet-amount-presets button').forEach(b => {
+    b.addEventListener('click', () => {
+      betAmountInput.value = b.dataset.amount;
+      updateBetSummary();
+    });
+  });
+  if (betConfirm) betConfirm.addEventListener('click', async () => {
+    const connected = btnBinance && btnBinance.classList.contains('connected');
+    if (!connected) {
+      closeBetModal();
+      openBinanceModal();
+      return;
+    }
+    const amt = parseFloat(betAmountInput.value) || 0;
+    if (amt <= 0) { showToast('Enter a valid amount'); return; }
+    showToast(`Placing $${amt} on ${activeBetSide} — Predict.fun Testnet`);
+    setTimeout(() => {
+      showToast('✓ Bet placed on Predict.fun Testnet');
+      closeBetModal();
+    }, 1500);
+  });
 
   // ──── Download tracking ────
   const panelDownload = document.getElementById('panelDownload');
