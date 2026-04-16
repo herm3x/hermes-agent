@@ -204,27 +204,12 @@
           const type = item.dataset.type;
           const next = joinPath(currentFileDir, name);
           if (type === 'directory') loadDirectory(next);
-          else loadFilePreview(next);
           container.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
           item.classList.add('active');
         });
       });
     } catch (e) {
       console.error('Files fetch failed:', e);
-    }
-  }
-
-  async function loadFilePreview(filePath) {
-    const preview = document.getElementById('filePreviewContent');
-    try {
-      const res = await fetch(`${API}/files/read?path=${encodeURIComponent(filePath)}`);
-      const d = await res.json();
-      if (d.error) { preview.innerHTML = `<div class="fc-row error">${esc(d.error)}</div>`; return; }
-      const lines = d.content.split('\n').slice(0, 30);
-      preview.innerHTML = lines.map(l => `<div class="fc-row">${esc(l)}</div>`).join('') +
-        (d.content.split('\n').length > 30 ? '<div class="fc-row dim">... (truncated)</div>' : '');
-    } catch {
-      preview.innerHTML = '<div class="fc-row error">Failed to load file</div>';
     }
   }
 
