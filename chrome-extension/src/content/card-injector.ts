@@ -7,20 +7,37 @@ export function setCardConfig(config: HermexConfig): void {
   currentConfig = config;
 }
 
+function getLogoUrl(): string {
+  try { return chrome.runtime.getURL('assets/hermex-eye.jpg'); } catch { return ''; }
+}
+
+function getLogoPngUrl(): string {
+  try { return chrome.runtime.getURL('assets/hermex-eye.png'); } catch { return ''; }
+}
+
 export function injectLoadingCard(tweetEl: HTMLElement, tweetId: string): void {
   if (tweetEl.querySelector(`[${CARD_ATTR}]`)) return;
 
+  const logoUrl = getLogoUrl();
+  const logoPng = getLogoPngUrl();
   const card = document.createElement('div');
   card.setAttribute(CARD_ATTR, tweetId);
   card.className = 'hermex-card hermex-loading';
   card.innerHTML = `
     <div class="hermex-card-header">
-      <span class="hermex-logo">☤ Hermex</span>
-      <span class="hermex-badge">Loading...</span>
+      <div class="hermex-header-left">
+        <div class="hermex-logo-wrap">
+          <img src="${logoUrl}" onerror="this.src='${logoPng}'" alt="" class="hermex-logo-img">
+          <div class="hermex-logo-glow"></div>
+        </div>
+        <pre class="hermex-ascii-name">╦ ╦ ╔═╗ ╦═╗ ╔╦╗ ╔═╗ ═╗ ╦
+╠═╣ ║╣  ╠╦╝ ║║║ ║╣  ╔╩╦╝
+╩ ╩ ╚═╝ ╩╚═ ╩ ╩ ╚═╝ ╩ ╚═</pre>
+      </div>
     </div>
     <div class="hermex-card-body">
       <div class="hermex-spinner"></div>
-      <p class="hermex-loading-text">Hermes Agent is analyzing this tweet...</p>
+      <p class="hermex-loading-text">Hermes Agent analyzing...</p>
     </div>
   `;
 
@@ -39,11 +56,11 @@ export function updateCard(tweetId: string, data: ProposalCardData): void {
   card.className = 'hermex-card';
 
   if (data.status === 'error') {
-    card.innerHTML = buildErrorCard(data.errorMessage || 'Failed to generate proposal');
+    (card as HTMLElement).remove();
     return;
   }
 
-  card.innerHTML = buildProposalCard(data.proposal, data.existingMarket, data.tweetId);
+  card.innerHTML = buildProposalCard(data.proposal, data.existingMarket, data.tweetId, data.marketData);
   attachCardListeners(card as HTMLElement, data);
 }
 
@@ -51,6 +68,7 @@ function buildProposalCard(
   proposal: MarketProposal,
   existingMarket?: PredictFunMarket,
   tweetId?: string,
+  marketData?: any,
 ): string {
   const yesProb = Math.round(proposal.initial_probability * 100);
   const noProb = 100 - yesProb;
@@ -58,63 +76,94 @@ function buildProposalCard(
   const isTestnet = currentConfig.useTestnet;
   const tags = proposal.tags.map(t => `<span class="hermex-tag">${escapeHtml(t)}</span>`).join('');
 
-  const marketInfo = existingMarket
-    ? `<div class="hermex-market-info">
-        <span>Volume: $${formatNumber(existingMarket.volume)}</span>
-        <span>Liquidity: $${formatNumber(existingMarket.liquidity)}</span>
-        <span>Ends: ${endTime}</span>
-      </div>`
-    : `<div class="hermex-market-info">
-        <span class="hermex-new-market">New Market Proposal</span>
-        <span>Ends: ${endTime}</span>
-      </div>`;
+  const cat = (proposal as any).category || 'crypto';
+  const categoryColors: Record<string, string> = {
+    crypto: '#5b9aff', politics: '#ff6b8a', tech: '#5aedc2',
+    sports: '#ffc46b', culture: '#b8a0ff', business: '#64d8ff',
+  };
+  const catColor = categoryColors[cat] || '#5b9aff';
+
+  const vol = marketData?.volume || '--';
+  const liq = marketData?.liquidity || '--';
+  const traders = marketData?.traders || 0;
+  const spread = marketData?.spread || '--';
+  const priceChange = marketData?.priceChange24h || '+0.0%';
+  const changeDir = marketData?.priceChangeDirection || 'up';
+  const changeIcon = changeDir === 'up' ? '▲' : '▼';
+  const changeClass = changeDir === 'up' ? 'hermex-change-up' : 'hermex-change-down';
+
+  const reasoning = (proposal as any).confidence_reasoning
+    ? `<div class="hermex-reasoning">◈ ${escapeHtml((proposal as any).confidence_reasoning)}</div>`
+    : '';
+
+  const logoUrl = getLogoUrl();
+  const logoPng = getLogoPngUrl();
 
   return `
     <div class="hermex-card-header">
       <div class="hermex-header-left">
-        <span class="hermex-logo">☤ Hermex</span>
-        <span class="hermex-source">Predict.fun</span>
+        <div class="hermex-logo-wrap">
+          <img src="${logoUrl}" onerror="this.src='${logoPng}'" alt="" class="hermex-logo-img">
+          <div class="hermex-logo-glow"></div>
+        </div>
+        <div class="hermex-brand">
+          <pre class="hermex-ascii-name">╦ ╦ ╔═╗ ╦═╗ ╔╦╗ ╔═╗ ═╗ ╦
+╠═╣ ║╣  ╠╦╝ ║║║ ║╣  ╔╩╦╝
+╩ ╩ ╚═╝ ╩╚═ ╩ ╩ ╚═╝ ╩ ╚═</pre>
+          <span class="hermex-sub-brand">Predict.fun · <span class="hermex-cat-inline" style="color:${catColor}">${escapeHtml(cat)}</span></span>
+        </div>
       </div>
       <div class="hermex-header-right">
-        ${isTestnet ? '<span class="hermex-badge hermex-testnet">Testnet</span>' : ''}
+        <span class="${changeClass}">${changeIcon} ${priceChange}</span>
+        ${isTestnet ? '<span class="hermex-badge hermex-testnet">TESTNET</span>' : ''}
       </div>
     </div>
     <div class="hermex-card-body">
       <h3 class="hermex-title">${escapeHtml(proposal.title)}</h3>
       <p class="hermex-desc">${escapeHtml(proposal.description)}</p>
+      ${reasoning}
       <div class="hermex-outcomes">
-        <div class="hermex-outcome hermex-yes">
-          <span class="hermex-outcome-label">Yes</span>
-          <div class="hermex-bar-container">
-            <div class="hermex-bar hermex-bar-yes" style="width: ${yesProb}%"></div>
+        <button class="hermex-outcome-btn hermex-yes-btn">
+          <span class="hermex-outcome-label">YES</span>
+          <span class="hermex-outcome-price">${yesProb}¢</span>
+          <div class="hermex-mini-bar">
+            <div class="hermex-mini-fill hermex-mini-yes" style="width:${yesProb}%"></div>
           </div>
-          <span class="hermex-prob">${yesProb}%</span>
-        </div>
-        <div class="hermex-outcome hermex-no">
-          <span class="hermex-outcome-label">No</span>
-          <div class="hermex-bar-container">
-            <div class="hermex-bar hermex-bar-no" style="width: ${noProb}%"></div>
+        </button>
+        <button class="hermex-outcome-btn hermex-no-btn">
+          <span class="hermex-outcome-label">NO</span>
+          <span class="hermex-outcome-price">${noProb}¢</span>
+          <div class="hermex-mini-bar">
+            <div class="hermex-mini-fill hermex-mini-no" style="width:${noProb}%"></div>
           </div>
-          <span class="hermex-prob">${noProb}%</span>
-        </div>
+        </button>
       </div>
-      ${marketInfo}
+      <div class="hermex-market-stats">
+        <span class="hermex-stat">VOL <span class="hermex-stat-val">${vol}</span></span>
+        <span class="hermex-stat">LIQ <span class="hermex-stat-val">${liq}</span></span>
+        <span class="hermex-stat">TRADERS <span class="hermex-stat-val">${traders}</span></span>
+        <span class="hermex-stat">SPREAD <span class="hermex-stat-val">${spread}</span></span>
+        <span class="hermex-stat">ENDS <span class="hermex-stat-val">${endTime}</span></span>
+      </div>
       <div class="hermex-tags">${tags}</div>
     </div>
     <div class="hermex-card-actions">
       <button class="hermex-btn hermex-btn-primary hermex-trade-btn"
               data-tweet-id="${tweetId}">
-        Trade on Predict.fun
+        TRADE ON PREDICT.FUN
       </button>
       <div class="hermex-secondary-actions">
         <button class="hermex-btn hermex-btn-secondary hermex-copy-btn"
                 data-proposal='${JSON.stringify(proposal).replace(/'/g, '&#39;')}'>
-          Copy Proposal
+          COPY
         </button>
         <button class="hermex-btn hermex-btn-secondary hermex-vote-btn">
-          Vote to Launch
+          VOTE TO LAUNCH
         </button>
       </div>
+    </div>
+    <div class="hermex-card-footer">
+      <span class="hermex-powered">Powered by <a href="https://github.com/herm3x/hermes-agent" target="_blank">Hermes Agent</a></span>
     </div>
   `;
 }

@@ -15,6 +15,8 @@ export interface MarketProposal {
   end_time: string;
   tags: string[];
   initial_probability: number;
+  category?: string;
+  confidence_reasoning?: string;
 }
 
 export interface PredictFunMarket {

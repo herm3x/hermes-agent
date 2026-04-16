@@ -8,7 +8,13 @@
 <body>
   <div class="popup-container">
     <header class="popup-header">
-      <h1>☤ Hermex</h1>
+      <div class="popup-logo-wrap">
+        <img src="assets/hermex-eye.jpg" onerror="this.src='assets/hermex-eye.png'" alt="Hermex" class="popup-logo-img">
+        <div class="popup-logo-glow"></div>
+      </div>
+      <pre class="popup-ascii-name">╦ ╦ ╔═╗ ╦═╗ ╔╦╗ ╔═╗ ═╗ ╦
+╠═╣ ║╣  ╠╦╝ ║║║ ║╣  ╔╩╦╝
+╩ ╩ ╚═╝ ╩╚═ ╩ ╩ ╚═╝ ╩ ╚═</pre>
       <p class="subtitle">Prediction Markets on X</p>
     </header>
 
@@ -29,7 +35,7 @@
 
     <div class="popup-section">
       <h3>Backend API URL</h3>
-      <input type="text" id="api-url" class="text-input" value="http://localhost:3888" placeholder="http://localhost:3888">
+      <input type="text" id="api-url" class="text-input" value="http://localhost:6088" placeholder="http://localhost:6088">
     </div>
 
     <div class="popup-section">
@@ -48,7 +54,7 @@
         <span class="stat-label">Proposals Today</span>
       </div>
       <div class="stat">
-        <span class="stat-value" id="daily-limit">50</span>
+        <span class="stat-value" id="daily-limit">500</span>
         <span class="stat-label">Daily Limit</span>
       </div>
     </div>

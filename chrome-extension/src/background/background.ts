@@ -5,6 +5,14 @@ chrome.runtime.onInstalled.addListener(async () => {
   await resetDailyCounter();
 });
 
+(async () => {
+  await resetDailyCounter();
+  const cfg = await getConfig();
+  if (cfg.proposalsToday >= cfg.dailyLimit || cfg.dailyLimit <= 50) {
+    await setConfig({ proposalsToday: 0, dailyLimit: 500 });
+  }
+})();
+
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   handleMessage(message).then(sendResponse);
   return true;
@@ -58,6 +66,7 @@ async function generateProposal(
       data: {
         proposal: result.proposal as MarketProposal,
         existingMarket: result.existingMarket || undefined,
+        marketData: result.marketData || undefined,
         tweetId: tweetData.id,
         status: 'ready',
       },

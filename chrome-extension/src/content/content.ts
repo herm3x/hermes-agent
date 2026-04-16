@@ -1,76 +1,90 @@
 import './styles.css';
-import { extractTweetData, shouldPropose, markProcessed, getTweetElements } from './tweet-detector';
+import { extractTweetData, shouldPropose, markProcessed, getTweetElements, clearProcessed } from './tweet-detector';
 import { injectLoadingCard, updateCard, setCardConfig } from './card-injector';
 import { HermexConfig, DEFAULT_CONFIG, TweetData, ProposalCardData } from '../types';
 
 let config: HermexConfig = DEFAULT_CONFIG;
 let scanTimer: ReturnType<typeof setTimeout> | null = null;
+let alive = true;
+
+function isContextValid(): boolean {
+  try {
+    return !!(chrome?.runtime?.id);
+  } catch {
+    alive = false;
+    return false;
+  }
+}
+
+async function safeSendMessage(msg: any): Promise<any> {
+  if (!isContextValid()) return null;
+  try {
+    return await chrome.runtime.sendMessage(msg);
+  } catch {
+    alive = false;
+    return null;
+  }
+}
 
 async function loadConfig(): Promise<void> {
-  try {
-    const response = await chrome.runtime.sendMessage({ type: 'GET_CONFIG' });
-    if (response?.config) {
-      config = response.config;
-      setCardConfig(config);
-    }
-  } catch {
-    /* use defaults */
+  const response = await safeSendMessage({ type: 'GET_CONFIG' });
+  if (response?.config) {
+    config = response.config;
+    setCardConfig(config);
   }
 }
 
 async function processTweet(tweet: TweetData): Promise<void> {
+  if (!alive) return;
   if (config.proposalsToday >= config.dailyLimit) return;
 
   markProcessed(tweet.id);
   injectLoadingCard(tweet.element, tweet.id);
+  config.proposalsToday++;
 
+  const { element, ...tweetPayload } = tweet;
   try {
-    const { element, ...tweetPayload } = tweet;
-    const response = await chrome.runtime.sendMessage({
+    const response = await safeSendMessage({
       type: 'GENERATE_PROPOSAL',
       tweetData: tweetPayload,
     });
 
+    if (!alive) return;
+
     if (response?.data) {
       updateCard(tweet.id, response.data as ProposalCardData);
     } else {
-      updateCard(tweet.id, {
-        proposal: null as any,
-        tweetId: tweet.id,
-        status: 'error',
-        errorMessage: 'No response from Hermes Agent',
-      });
+      const card = document.querySelector(`[data-hermex-card="${tweet.id}"]`);
+      if (card) card.remove();
     }
   } catch (err) {
-    updateCard(tweet.id, {
-      proposal: null as any,
-      tweetId: tweet.id,
-      status: 'error',
-      errorMessage: err instanceof Error ? err.message : 'Unknown error',
-    });
+    console.error('[Hermex] processTweet error:', err);
   }
 }
 
 function scanFeed(): void {
-  if (!config.enabled) return;
+  if (!alive || !config.enabled) return;
 
   const tweets = getTweetElements();
   for (const el of tweets) {
     const tweet = extractTweetData(el);
     if (!tweet) continue;
-    if (shouldPropose(tweet, config.kolWhitelist)) {
+    const should = shouldPropose(tweet, config.kolWhitelist);
+    if (should) {
       processTweet(tweet);
     }
   }
 }
 
 function debouncedScan(): void {
+  if (!alive) return;
   if (scanTimer) clearTimeout(scanTimer);
   scanTimer = setTimeout(scanFeed, 300);
 }
 
 function startObserver(): void {
   const observer = new MutationObserver((mutations) => {
+    if (!alive) { observer.disconnect(); return; }
     let hasNewNodes = false;
     for (const mutation of mutations) {
       if (mutation.addedNodes.length > 0) {
@@ -90,17 +104,36 @@ function startObserver(): void {
   observer.observe(timeline, { childList: true, subtree: true });
 }
 
+function watchUrlChanges(): void {
+  let lastUrl = location.href;
+  setInterval(() => {
+    if (!alive) return;
+    if (location.href !== lastUrl) {
+      lastUrl = location.href;
+      clearProcessed();
+      setTimeout(scanFeed, 1000);
+    }
+  }, 1000);
+}
+
 async function init(): Promise<void> {
   await loadConfig();
+  if (!alive) return;
   scanFeed();
   startObserver();
+  watchUrlChanges();
 
-  chrome.storage.onChanged.addListener((changes) => {
-    if (changes.hermexConfig) {
-      config = { ...DEFAULT_CONFIG, ...changes.hermexConfig.newValue };
-      setCardConfig(config);
-    }
-  });
+  try {
+    chrome.storage.onChanged.addListener((changes) => {
+      if (!isContextValid()) return;
+      if (changes.hermexConfig) {
+        config = { ...DEFAULT_CONFIG, ...changes.hermexConfig.newValue };
+        setCardConfig(config);
+        clearProcessed();
+        setTimeout(scanFeed, 500);
+      }
+    });
+  } catch { /* context gone, ignore */ }
 }
 
 if (document.readyState === 'loading') {

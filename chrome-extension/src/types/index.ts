@@ -6,6 +6,8 @@ export interface MarketProposal {
   end_time: string;
   tags: string[];
   initial_probability: number;
+  category?: string;
+  confidence_reasoning?: string;
 }
 
 export interface TweetData {
@@ -30,9 +32,25 @@ export interface PredictFunMarket {
   url: string;
 }
 
+export interface MarketDataSim {
+  volume: string;
+  volumeRaw: number;
+  liquidity: string;
+  liquidityRaw: number;
+  traders: number;
+  spread: string;
+  yesPrice: string;
+  noPrice: string;
+  priceChange24h: string;
+  priceChangeDirection: 'up' | 'down';
+  hoursActive: number;
+  tier: number;
+}
+
 export interface ProposalCardData {
   proposal: MarketProposal;
   existingMarket?: PredictFunMarket;
+  marketData?: MarketDataSim;
   tweetId: string;
   status: 'loading' | 'ready' | 'error';
   errorMessage?: string;
@@ -51,12 +69,12 @@ export interface HermexConfig {
 
 export const DEFAULT_CONFIG: HermexConfig = {
   enabled: true,
-  apiUrl: 'http://localhost:3888',
+  apiUrl: 'http://localhost:6088',
   useTestnet: true,
   autoPropose: true,
   kolWhitelist: [],
   minFollowers: 50000,
-  dailyLimit: 50,
+  dailyLimit: 500,
   proposalsToday: 0,
 };
 
@@ -69,6 +87,8 @@ export const TOP_KOLS: string[] = [
   'laurashin', 'ErikVoorhees', 'TylerWinklevoss', 'cameron',
   'jessepollak', 'DeItaone', 'tier10k', 'WatcherGuru',
   'unusual_whales', 'RaoulGMI', 'whale_alert', 'documentingbtc',
+  'NousResearch', 'AIaboringAtMeta', 'OpenAI', 'AnthropicAI',
+  'GoogleDeepMind', 'ylaboringecun', 'kaboringpathy', 'drjimfan',
 ];
 
 export type MessageType =

@@ -11,7 +11,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
-    clean: true,
+    clean: false,
   },
   module: {
     rules: [
@@ -39,5 +39,9 @@ module.exports = {
       ],
     }),
   ],
-  devtool: 'cheap-module-source-map',
+  devtool: 'source-map',
+  stats: 'errors-warnings',
+  optimization: {
+    minimize: false,
+  },
 };

@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 import { config } from './config.js';
 import proposalRoutes from './routes/proposal.js';
 
@@ -21,20 +22,9 @@ app.use(cors({
 
 app.use(express.json({ limit: '1mb' }));
 
-app.use('/api', proposalRoutes);
+app.use(express.static(path.join(new URL('.', import.meta.url).pathname, '..', 'public')));
 
-app.get('/', (_req, res) => {
-  res.json({
-    name: 'Hermex Backend',
-    version: '0.1.0',
-    description: 'Hermes Agent + Predict.fun prediction market engine',
-    endpoints: {
-      health: 'GET /api/health',
-      proposal: 'POST /api/proposal',
-      searchMarkets: 'GET /api/markets/search?q=...',
-    },
-  });
-});
+app.use('/api', proposalRoutes);
 
 app.listen(config.port, () => {
   console.log(`

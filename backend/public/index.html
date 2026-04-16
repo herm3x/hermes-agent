@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hermex</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Spray Grain Background -->
+  <canvas id="matrixCanvas"></canvas>
+  <!-- ASCII art background layer -->
+  <div class="ascii-bg" id="asciiBg" aria-hidden="true"></div>
+
+  <!-- TOP NAV -->
+  <header class="top-bar">
+    <div class="top-left">
+      <a href="https://github.com/herm3x/hermes-agent" target="_blank" class="nav-icon" title="GitHub">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.8.1-.8.1-.8 1.2.1 1.9 1.3 1.9 1.3 1.1 1.9 2.9 1.3 3.6 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.4 1.2a11.5 11.5 0 0 1 6.2 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.3 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3"/></svg>
+      </a>
+      <a href="https://x.com" target="_blank" class="nav-icon" title="X">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+    </div>
+    <div class="top-right">
+      <span class="clock" id="clock">00:00:00</span>
+      <button class="btn btn-default" id="btnRefresh">REFRESH</button>
+      <button class="btn btn-accent" id="btnAuto">AUTO</button>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar-left">
+      <!-- Profile -->
+      <div class="panel profile-panel">
+        <div class="avatar-wrap">
+          <img src="hermex-eye.png" alt="Hermex Eye" class="avatar">
+          <span class="live-badge">● LIVE</span>
+        </div>
+        <div class="profile-name">Hermex</div>
+        <div class="profile-sub">hermes-3 · predict.fun</div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="panel">
+        <div class="panel-header"><span class="ph-icon">⚡</span> QUICK ACTIONS</div>
+        <div class="quick-links">
+          <a href="#" class="qlink" id="linkHealth">♡ CHECK HEALTH</a>
+          <a href="#" class="qlink" id="linkPredictFun">✦ PREDICT.FUN</a>
+          <a href="https://openrouter.ai" target="_blank" class="qlink">◈ OPENROUTER</a>
+        </div>
+      </div>
+
+      <!-- Platform -->
+      <div class="panel">
+        <div class="panel-header"><span class="ph-icon">⊡</span> PLATFORM</div>
+        <div class="info-grid">
+          <div class="info-item"><span class="fc-key">OS:</span> <span id="infoOS">—</span></div>
+          <div class="info-item"><span class="fc-key">CPU:</span> <span id="infoCPUModel">—</span></div>
+          <div class="info-item"><span class="fc-key">Runtime:</span> <span id="infoNode">—</span></div>
+        </div>
+      </div>
+
+      <!-- Services Status -->
+      <div class="panel">
+        <div class="panel-header"><span class="ph-icon">◉</span> SERVICES</div>
+        <div class="info-grid" id="servicesStatus">
+          <div class="info-item"><span class="dot green"></span> Hermex Backend</div>
+          <div class="info-item"><span class="dot" id="dotLLM"></span> Hermes-3 LLM</div>
+          <div class="info-item"><span class="dot" id="dotPredict"></span> Predict.fun API</div>
+          <div class="info-item"><span class="dot" id="dotExt"></span> Chrome Extension</div>
+        </div>
+      </div>
+
+      <!-- Recent Proposals -->
+      <div class="panel">
+        <div class="panel-header"><span class="ph-icon">✧</span> RECENT PROPOSALS</div>
+        <div class="session-list" id="recentProposals">
+          <div class="session-item dim">
+            <span class="session-icon">—</span>
+            <div><div class="session-title">No proposals yet</div><div class="session-sub">Hit TEST PROPOSAL ↑</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- API Endpoints -->
+      <div class="panel">
+        <div class="panel-header"><span class="ph-icon">⟡</span> API ENDPOINTS</div>
+        <div class="info-grid">
+          <div class="info-item"><span class="fc-key">POST</span> /api/proposal</div>
+          <div class="info-item"><span class="fc-key">GET</span> /api/markets/search</div>
+          <div class="info-item"><span class="fc-key">GET</span> /api/health</div>
+          <div class="info-item"><span class="fc-key">GET</span> /api/system</div>
+          <div class="info-item"><span class="fc-key">GET</span> /api/logs</div>
+          <div class="info-item"><span class="fc-key">GET</span> /api/tokens</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER -->
+    <main class="center-area">
+      <!-- System Overview Strip -->
+      <div class="panel system-strip">
+        <div class="strip-row">
+          <!-- CPU -->
+          <div class="strip-card">
+            <div class="strip-top">
+              <span class="strip-icon cpu-icon">⬡</span>
+              <span class="strip-label">CPU</span>
+            </div>
+            <div class="strip-value" id="cpuVal">—</div>
+            <div class="strip-bar"><div class="strip-fill cpu" id="cpuBar" style="width:0%"></div></div>
+            <div class="strip-sub" id="cpuSub">loading...</div>
+          </div>
+          <!-- MEM -->
+          <div class="strip-card">
+            <div class="strip-top">
+              <span class="strip-icon mem-icon">◈</span>
+              <span class="strip-label">MEM</span>
+            </div>
+            <div class="strip-value" id="memVal">—</div>
+            <div class="strip-bar"><div class="strip-fill mem" id="memBar" style="width:0%"></div></div>
+            <div class="strip-sub" id="memSub">loading...</div>
+          </div>
+          <!-- DISK -->
+          <div class="strip-card">
+            <div class="strip-top">
+              <span class="strip-icon disk-icon">◇</span>
+              <span class="strip-label">DISK</span>
+            </div>
+            <div class="strip-value" id="diskVal">—</div>
+            <div class="strip-bar"><div class="strip-fill disk" id="diskBar" style="width:0%"></div></div>
+            <div class="strip-sub" id="diskSub">loading...</div>
+          </div>
+          <!-- UPTIME -->
+          <div class="strip-card">
+            <div class="strip-top">
+              <span class="strip-icon up-icon">△</span>
+              <span class="strip-label">UPTIME</span>
+            </div>
+            <div class="strip-value uptime" id="uptimeVal">—</div>
+            <div class="strip-sub" id="uptimeSub">hermex process</div>
+          </div>
+          <!-- divider -->
+          <div class="strip-divider"></div>
+          <!-- REQUESTS -->
+          <div class="strip-card">
+            <div class="strip-top">
+              <span class="strip-icon req-icon">▸</span>
+              <span class="strip-label">REQUESTS</span>
+            </div>
+            <div class="strip-value" id="reqCount">0</div>
+            <div class="strip-sub">total api calls</div>
+          </div>
+          <!-- PROPOSALS -->
+          <div class="strip-card">
+            <div class="strip-top">
+              <span class="strip-icon prop-icon">✧</span>
+              <span class="strip-label">PROPOSALS</span>
+            </div>
+            <div class="strip-value" id="proposalCount">0</div>
+            <div class="strip-sub">llm generated</div>
+          </div>
+          <!-- LLM -->
+          <div class="strip-card">
+            <div class="strip-top">
+              <span class="strip-icon llm-icon">◉</span>
+              <span class="strip-label">LLM</span>
+            </div>
+            <div class="strip-value" id="llmCallCount">0</div>
+            <div class="strip-sub">hermes-3 calls</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Terminal Console -->
+      <div class="panel terminal-panel">
+        <div class="panel-header">
+          <span><span class="ph-icon">▸</span> hermex@localhost:~$</span>
+          <span class="header-badges">
+            <span class="badge">:6088</span>
+            <span class="badge green">RUNNING</span>
+          </span>
+        </div>
+        <div class="terminal-body" id="terminal">
+          <pre class="ascii-art">
+ ╦ ╦ ╔═╗ ╦═╗ ╔╦╗ ╔═╗ ═╗ ╦
+ ╠═╣ ║╣  ╠╦╝ ║║║ ║╣  ╔╩╦╝
+ ╩ ╩ ╚═╝ ╩╚═ ╩ ╩ ╚═╝ ╩ ╚═</pre>
+          <div class="term-info">
+            <span class="term-label">Inline prediction markets for X · powered by Hermes Agent + Predict.fun</span>
+          </div>
+          <div class="term-section">
+            <div class="term-heading">✦ Backend Services</div>
+            <div class="term-row"><span class="term-cat">LLM:</span> OpenRouter → hermes-3-llama-3.1-405b</div>
+            <div class="term-row"><span class="term-cat">Market:</span> Predict.fun Testnet API</div>
+            <div class="term-row"><span class="term-cat">Server:</span> Express + Bun on :6088</div>
+          </div>
+          <div class="term-section">
+            <div class="term-heading">✦ API Endpoints</div>
+            <div class="term-row"><span class="term-cat">POST</span> /api/proposal — tweet → prediction market</div>
+            <div class="term-row"><span class="term-cat">GET</span> /api/markets/search — find existing markets</div>
+            <div class="term-row"><span class="term-cat">GET</span> /api/system — real-time system metrics</div>
+          </div>
+          <div class="term-section">
+            <div class="term-heading">✦ Chrome Extension</div>
+            <div class="term-row"><span class="term-cat">Detect:</span> KOL tweets via MutationObserver</div>
+            <div class="term-row"><span class="term-cat">Inject:</span> prediction cards inline in X feed</div>
+            <div class="term-row"><span class="term-cat">Trade:</span> deep link → Predict.fun</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logs Bar -->
+      <div class="panel logs-panel">
+        <div class="panel-header">
+          <div class="log-tabs">
+            <button class="tab active">ALL LOGS</button>
+            <button class="tab" id="tabErrors">ERRORS</button>
+            <button class="tab" id="tabLLM">LLM</button>
+          </div>
+          <div class="log-controls">
+            <span class="badge green">● LIVE</span>
+            <span class="badge" id="logCount">0</span>
+          </div>
+        </div>
+        <div class="logs-body" id="logsBody"></div>
+      </div>
+    </main>
+
+    <!-- RIGHT SIDEBAR -->
+    <aside class="sidebar-right">
+      <!-- File Explorer -->
+      <div class="panel">
+        <div class="panel-header"><span class="ph-icon">⊞</span> FILE EXPLORER
+          <span class="header-badges"><span class="badge">LIVE</span></span>
+        </div>
+        <div class="file-tree">
+          <div class="file-dir" id="currentDir">loading...</div>
+          <div class="file-tree-items" id="fileTreeItems"></div>
+        </div>
+        <div class="panel file-preview">
+          <div class="panel-header">Preview <button class="btn btn-small" id="btnBackDir">↑ UP</button></div>
+          <div class="file-content" id="filePreviewContent">
+            <div class="fc-row dim">Click a file to preview</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Token Usage -->
+      <div class="panel">
+        <div class="panel-header"><span class="ph-icon">◇</span> TOKEN USAGE
+          <span class="header-badges"><span class="badge green">TRACKED</span></span>
+        </div>
+        <div class="token-grid">
+          <div class="token-row"><span class="token-label">Total tokens</span><span class="token-val" id="totalTokens">0</span></div>
+          <div class="token-row"><span class="token-label">Input tokens</span><span class="token-val" id="inputTokens">0</span></div>
+          <div class="token-row"><span class="token-label">Output tokens</span><span class="token-val" id="outputTokens">0</span></div>
+          <div class="token-row"><span class="token-label">Cache read</span><span class="token-val" id="cacheReadTokens">0</span></div>
+          <div class="token-row"><span class="token-label">API requests</span><span class="token-val" id="apiRequests">0</span></div>
+          <div class="token-row"><span class="token-label">LLM messages</span><span class="token-val" id="llmMessages">0</span></div>
+        </div>
+      </div>
+
+      <!-- Active Model -->
+      <div class="panel">
+        <div class="panel-header"><span class="ph-icon">◈</span> ACTIVE MODEL</div>
+        <div class="models-list">
+          <div class="model-item active">
+            <span class="model-name">hermes-3-llama-3.1-405b</span>
+            <span class="model-cost accent">ACTIVE</span>
+          </div>
+          <div class="model-item">
+            <span class="model-name">Provider: OpenRouter</span>
+            <span class="model-cost">API v1</span>
+          </div>
+          <div class="model-item">
+            <span class="model-name">Max tokens: 500</span>
+            <span class="model-cost">Temp: 0.7</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tools -->
+      <div class="panel">
+        <div class="panel-header"><span class="ph-icon">⚙</span> BACKEND TOOLS</div>
+        <div class="tools-list">
+          <div class="tool-item"><span class="tool-name">proposal_generator</span><span class="tool-sub accent">● ON</span></div>
+          <div class="tool-item"><span class="tool-name">market_search</span><span class="tool-sub accent">● ON</span></div>
+          <div class="tool-item"><span class="tool-name">system_monitor</span><span class="tool-sub accent">● ON</span></div>
+          <div class="tool-item"><span class="tool-name">log_collector</span><span class="tool-sub accent">● ON</span></div>
+          <div class="tool-item"><span class="tool-name">token_tracker</span><span class="tool-sub accent">● ON</span></div>
+          <div class="tool-item"><span class="tool-name">file_explorer</span><span class="tool-sub accent">● ON</span></div>
+          <div class="tool-item"><span class="tool-name">kol_detector</span><span class="tool-sub">EXT</span></div>
+          <div class="tool-item"><span class="tool-name">card_injector</span><span class="tool-sub">EXT</span></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script src="matrix.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

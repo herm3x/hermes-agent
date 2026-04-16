@@ -1,6 +1,10 @@
 import { TweetData, TOP_KOLS } from '../types';
 
-const PROCESSED_TWEETS = new Set<string>();
+let PROCESSED_TWEETS = new Set<string>();
+
+export function clearProcessed(): void {
+  PROCESSED_TWEETS = new Set<string>();
+}
 
 const CONTROVERSY_PATTERNS = [
   /\b(wrong|disagree|scam|fraud|lawsuit|fired|resign|ban|arrest|hack|exploit|rug)\b/i,
