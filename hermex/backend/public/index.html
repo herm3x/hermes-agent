@@ -144,23 +144,27 @@
   <div class="main-layout">
     <!-- LEFT SIDEBAR -->
     <aside class="sidebar-left">
-      <!-- Profile -->
+      <!-- Profile (with inline platform stats) -->
       <div class="panel profile-panel">
         <div class="avatar-wrap">
           <img src="hermex-eye.png" alt="Hermex Eye" class="avatar">
         </div>
         <div class="profile-name">Hermex</div>
         <div class="profile-sub">Powered by Hermes</div>
-      </div>
-
-      <!-- Platform -->
-      <div class="panel">
-        <div class="panel-header"><span class="ph-icon">⊡</span> PLATFORM</div>
-        <dl class="stat-list">
-          <div class="stat-row"><dt>OS</dt><dd id="infoOS" title="—">—</dd></div>
-          <div class="stat-row"><dt>CPU</dt><dd id="infoCPUModel" title="—">—</dd></div>
-          <div class="stat-row"><dt>Runtime</dt><dd id="infoNode" title="—">—</dd></div>
-        </dl>
+        <div class="profile-stats">
+          <div class="ps-row">
+            <span class="ps-label">OS</span>
+            <span class="ps-value" id="infoOS" title="—">—</span>
+          </div>
+          <div class="ps-row">
+            <span class="ps-label">CPU</span>
+            <span class="ps-value" id="infoCPUModel" title="—">—</span>
+          </div>
+          <div class="ps-row">
+            <span class="ps-label">Runtime</span>
+            <span class="ps-value" id="infoNode" title="—">—</span>
+          </div>
+        </div>
       </div>
 
       <!-- Services Status -->

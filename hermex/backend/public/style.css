@@ -3384,3 +3384,53 @@ body.docs-body { overflow-y: auto; }
 @media (max-width: 380px) {
   .btn-icon { width: 26px; height: 26px; }
 }
+
+/* Inline platform stats inside the profile panel */
+.profile-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(91, 154, 255, 0.12);
+  text-align: left;
+}
+.ps-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 5px 8px;
+  background: rgba(15, 30, 56, 0.5);
+  border: 1px solid rgba(91, 154, 255, 0.1);
+  border-left: 2px solid rgba(91, 154, 255, 0.38);
+  border-radius: 6px;
+  min-width: 0;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+.ps-row:hover {
+  border-left-color: rgba(91, 154, 255, 0.8);
+  background: rgba(20, 42, 78, 0.6);
+}
+.ps-label {
+  flex-shrink: 0;
+  width: 52px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0.9;
+}
+.ps-value {
+  flex: 1;
+  min-width: 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--white-glow);
+  line-height: 1.35;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
