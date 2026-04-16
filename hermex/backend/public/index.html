@@ -164,17 +164,14 @@
 
       <!-- Logs (moved from center) -->
       <div class="panel logs-panel logs-panel-side">
-        <div class="panel-header">
+        <div class="panel-header logs-panel-header">
           <div class="log-tabs">
-            <button class="tab active">ALL</button>
-            <button class="tab" id="tabErrors">ERR</button>
-            <button class="tab" id="tabLLM">LLM</button>
-            <button class="tab" id="tabApi">API</button>
+            <button class="tab active" data-tab="all">ALL</button>
+            <button class="tab" id="tabErrors" data-tab="errors">ERR</button>
+            <button class="tab" id="tabLLM" data-tab="llm">LLM</button>
+            <button class="tab" id="tabApi" data-tab="api">API</button>
           </div>
-          <div class="log-controls">
-            <span class="badge green">● LIVE</span>
-            <span class="badge" id="logCount">0</span>
-          </div>
+          <span class="log-live-pill"><span class="ll-dot"></span><span id="logCount">0</span></span>
         </div>
         <div class="logs-body" id="logsBody"></div>
       </div>

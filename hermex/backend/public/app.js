@@ -110,6 +110,15 @@
 
   function renderLogs() {
     const body = document.getElementById('logsBody');
+    if (!body) return;
+
+    // Preserve scroll intent: only auto-stick to bottom when user was already
+    // within 40px of it. Otherwise keep the current scroll position so they
+    // can read history without it jumping.
+    const STICK_THRESHOLD = 40;
+    const wasNearBottom =
+      body.scrollHeight - body.scrollTop - body.clientHeight < STICK_THRESHOLD;
+    const prevScrollTop = body.scrollTop;
 
     if (logFilter === 'api') {
       if (!apiEndpoints.length) {
@@ -132,7 +141,12 @@
       const cls = l.level === 'error' ? ' error' : l.level === 'info' && l.source === 'SYSTEM' ? ' info' : '';
       return `<div class="log-line${cls}"><span class="log-ts">${esc(l.timestamp)}</span> <span class="log-src">${esc(l.source)}</span> <span class="log-msg">${esc(l.message)}</span></div>`;
     }).join('');
-    body.scrollTop = body.scrollHeight;
+
+    if (wasNearBottom) {
+      body.scrollTop = body.scrollHeight;
+    } else {
+      body.scrollTop = prevScrollTop;
+    }
   }
 
   setInterval(fetchLogs, 2000);
