@@ -745,3 +745,30 @@ body::before {
   .main-layout { grid-template-columns: 1fr; }
   .sidebar-left, .sidebar-right { display: none; }
 }
+
+/* ──── Toast ──── */
+.hermex-toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.95), rgba(30, 64, 175, 0.95));
+  color: #e0ecff;
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(96, 165, 250, 0.4);
+  box-shadow: 0 8px 32px rgba(30, 64, 175, 0.4), 0 0 20px rgba(96, 165, 250, 0.3);
+  backdrop-filter: blur(20px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 10000;
+  white-space: nowrap;
+}
+.hermex-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}

@@ -256,23 +256,20 @@
   }
   fetchEndpoints();
 
-  // ──── Health Check ────
-  document.getElementById('linkHealth').addEventListener('click', async (e) => {
-    e.preventDefault();
-    try {
-      const res = await fetch(`${API}/health`);
-      const d = await res.json();
-      addProposal({ title: `Health: ${d.status} — ${d.service} v${d.version}`, tags: ['health'] });
-    } catch {
-      addProposal({ title: 'Health check FAILED', tags: ['error'] });
+  // ──── Coming Soon Toast ────
+  function showToast(message) {
+    let toast = document.getElementById('hermexToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'hermexToast';
+      toast.className = 'hermex-toast';
+      document.body.appendChild(toast);
     }
-    fetchLogs();
-  });
-
-  document.getElementById('linkPredictFun').addEventListener('click', (e) => {
-    e.preventDefault();
-    window.open('https://predict.fun', '_blank');
-  });
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => toast.classList.remove('show'), 2200);
+  }
 
   function addProposal(p) {
     proposals.unshift(p);
@@ -288,25 +285,12 @@
     }).join('');
   }
 
-  // ──── Refresh ────
-  document.getElementById('btnRefresh').addEventListener('click', () => {
-    setMood('working');
-    fetchSystem();
-    fetchLogs();
-    fetchTokens();
-    checkServices();
-    if (currentFileDir) loadDirectory(currentFileDir);
-    setTimeout(() => setMood('idle'), 2000);
-  });
+  // ──── Top-right buttons (Binance / Predict.fun) ────
+  const btnBinance = document.getElementById('btnBinance');
+  if (btnBinance) btnBinance.addEventListener('click', () => showToast('Binance integration — Coming Soon'));
 
-  // ──── Auto Toggle ────
-  let autoMode = true;
-  document.getElementById('btnAuto').addEventListener('click', () => {
-    autoMode = !autoMode;
-    const btn = document.getElementById('btnAuto');
-    btn.textContent = autoMode ? 'AUTO' : 'MANUAL';
-    btn.className = autoMode ? 'btn btn-accent' : 'btn btn-default';
-  });
+  const btnPredictFun = document.getElementById('btnPredictFun');
+  if (btnPredictFun) btnPredictFun.addEventListener('click', () => showToast('Predict.fun trading — Coming Soon'));
 
   // ──── Terminal cursor ────
   const terminalBody = document.getElementById('terminal');
