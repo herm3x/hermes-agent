@@ -31,6 +31,12 @@
         </span>
         <span>DOCS</span>
       </a>
+      <a href="https://x.com/herm3x" target="_blank" rel="noopener" class="btn btn-icon" title="X / @herm3x" aria-label="X / @herm3x">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://github.com/herm3x/hermes-agent" target="_blank" rel="noopener" class="btn btn-icon" title="GitHub" aria-label="GitHub">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.8.1-.8.1-.8 1.2.1 1.9 1.3 1.9 1.3 1.1 1.9 2.9 1.3 3.6 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.4 1.2a11.5 11.5 0 0 1 6.2 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.3 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3"/></svg>
+      </a>
     </div>
     <div class="top-right">
       <button class="btn btn-binance" id="btnBinance">
@@ -145,37 +151,27 @@
         </div>
         <div class="profile-name">Hermex</div>
         <div class="profile-sub">Powered by Hermes</div>
-        <div class="profile-socials">
-          <a href="https://x.com/herm3x" target="_blank" rel="noopener" class="profile-social" title="X / Twitter">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-            <span>@herm3x</span>
-          </a>
-          <a href="https://github.com/herm3x/hermes-agent" target="_blank" rel="noopener" class="profile-social" title="GitHub">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.8.1-.8.1-.8 1.2.1 1.9 1.3 1.9 1.3 1.1 1.9 2.9 1.3 3.6 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.4 1.2a11.5 11.5 0 0 1 6.2 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.3 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3"/></svg>
-            <span>GitHub</span>
-          </a>
-        </div>
       </div>
 
       <!-- Platform -->
       <div class="panel">
         <div class="panel-header"><span class="ph-icon">⊡</span> PLATFORM</div>
-        <div class="info-grid">
-          <div class="info-item"><span class="fc-key">OS:</span> <span id="infoOS">—</span></div>
-          <div class="info-item"><span class="fc-key">CPU:</span> <span id="infoCPUModel">—</span></div>
-          <div class="info-item"><span class="fc-key">Runtime:</span> <span id="infoNode">—</span></div>
-        </div>
+        <dl class="stat-list">
+          <div class="stat-row"><dt>OS</dt><dd id="infoOS" title="—">—</dd></div>
+          <div class="stat-row"><dt>CPU</dt><dd id="infoCPUModel" title="—">—</dd></div>
+          <div class="stat-row"><dt>Runtime</dt><dd id="infoNode" title="—">—</dd></div>
+        </dl>
       </div>
 
       <!-- Services Status -->
       <div class="panel">
         <div class="panel-header"><span class="ph-icon">◉</span> SERVICES</div>
-        <div class="info-grid" id="servicesStatus">
-          <div class="info-item"><span class="dot green"></span> Hermex Backend</div>
-          <div class="info-item"><span class="dot" id="dotLLM"></span> Hermes-3 LLM</div>
-          <div class="info-item"><span class="dot" id="dotPredict"></span> Predict.fun API</div>
-          <div class="info-item"><span class="dot" id="dotExt"></span> Chrome Extension</div>
-        </div>
+        <ul class="svc-list" id="servicesStatus">
+          <li class="svc-row"><span class="svc-dot green"></span><span class="svc-name">Hermex Backend</span><span class="svc-tag">UP</span></li>
+          <li class="svc-row"><span class="svc-dot" id="dotLLM"></span><span class="svc-name">Hermes-3 LLM</span><span class="svc-tag" id="tagLLM">—</span></li>
+          <li class="svc-row"><span class="svc-dot" id="dotPredict"></span><span class="svc-name">Predict.fun API</span><span class="svc-tag" id="tagPredict">—</span></li>
+          <li class="svc-row"><span class="svc-dot" id="dotExt"></span><span class="svc-name">Chrome Extension</span><span class="svc-tag" id="tagExt">—</span></li>
+        </ul>
       </div>
 
       <!-- Logs (moved from center) -->

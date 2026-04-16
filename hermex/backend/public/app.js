@@ -51,6 +51,13 @@
       const d = await res.json();
 
       const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      const setStat = (id, val) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const s = val == null ? '—' : String(val);
+        el.textContent = s;
+        el.setAttribute('title', s);
+      };
       const setWidth = (id, val) => { const el = document.getElementById(id); if (el) el.style.width = val; };
 
       setText('cpuVal', d.cpu.load.toFixed(2));
@@ -66,9 +73,9 @@
       setWidth('diskBar', d.disk.percent + '%');
 
       setText('uptimeVal', d.uptime.formatted);
-      setText('infoOS', d.platform);
-      setText('infoCPUModel', d.cpu.model.substring(0, 40));
-      setText('infoNode', `Bun ${d.nodeVersion}`);
+      setStat('infoOS', d.platform);
+      setStat('infoCPUModel', d.cpu.model);
+      setStat('infoNode', `Bun ${d.nodeVersion}`);
     } catch (e) {
       console.error('System fetch failed:', e);
     }
@@ -232,20 +239,32 @@
     try {
       const res = await fetch(`${API}/health`);
       const d = await res.json();
-      setDot('dotLLM', d.status === 'ok' ? 'green' : 'yellow');
-    } catch { setDot('dotLLM', 'red'); }
+      setDot('dotLLM', d.status === 'ok' ? 'green' : 'yellow', 'tagLLM', d.status === 'ok' ? 'UP' : 'WARN');
+    } catch { setDot('dotLLM', 'red', 'tagLLM', 'DOWN'); }
 
     try {
       const res = await fetch(`${API}/markets/search?q=test`);
-      setDot('dotPredict', res.ok ? 'green' : 'yellow');
-    } catch { setDot('dotPredict', 'red'); }
+      setDot('dotPredict', res.ok ? 'green' : 'yellow', 'tagPredict', res.ok ? 'UP' : 'WARN');
+    } catch { setDot('dotPredict', 'red', 'tagPredict', 'DOWN'); }
 
-    setDot('dotExt', 'yellow');
+    setDot('dotExt', 'yellow', 'tagExt', 'IDLE');
   }
 
-  function setDot(id, color) {
+  function setDot(id, color, tagId, tagText) {
     const el = document.getElementById(id);
-    if (el) el.className = `dot ${color}`;
+    if (el) {
+      // Preserve base class (dot or svc-dot) and swap only the status color
+      el.classList.remove('green', 'yellow', 'red', 'amber');
+      el.classList.add(color);
+    }
+    if (tagId) {
+      const t = document.getElementById(tagId);
+      if (t) {
+        t.textContent = tagText || '';
+        t.classList.remove('up', 'warn', 'down', 'idle');
+        if (tagText) t.classList.add(tagText.toLowerCase());
+      }
+    }
   }
 
   checkServices();
