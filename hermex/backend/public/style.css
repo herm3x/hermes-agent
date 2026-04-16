@@ -3434,3 +3434,86 @@ body.docs-body { overflow-y: auto; }
   overflow-wrap: anywhere;
   text-align: right;
 }
+
+/* ============================================================
+   2026-04-16 FIX PASS: panel content being covered / clipped
+   - Soften the fixed vignette that was covering sidebar edges
+   - Lift sidebars above the vignette
+   - Compact profile card so OS/CPU/Runtime stay on one line
+   - Make sidebar scrollbars visible so users know SERVICES has
+     4 rows (Chrome Extension was hidden below the fold)
+   ============================================================ */
+
+/* Soften vignette + push content above it */
+.main-layout::after {
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(6,12,20,0.18) 100%) !important;
+  z-index: 1 !important;
+}
+.sidebar-left, .sidebar-right, .center-area {
+  position: relative;
+  z-index: 4;
+}
+
+/* Visible thin scrollbars on both sidebars */
+.sidebar-left, .sidebar-right {
+  overflow-x: hidden;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(91,154,255,0.35) transparent;
+}
+.sidebar-left::-webkit-scrollbar,
+.sidebar-right::-webkit-scrollbar { width: 5px; }
+.sidebar-left::-webkit-scrollbar-track,
+.sidebar-right::-webkit-scrollbar-track { background: transparent; }
+.sidebar-left::-webkit-scrollbar-thumb,
+.sidebar-right::-webkit-scrollbar-thumb {
+  background: rgba(91,154,255,0.32);
+  border-radius: 3px;
+}
+.sidebar-left::-webkit-scrollbar-thumb:hover,
+.sidebar-right::-webkit-scrollbar-thumb:hover {
+  background: rgba(91,154,255,0.55);
+}
+
+/* Compact the profile panel so SERVICES stays in-view */
+.profile-panel {
+  padding: 16px 12px 14px !important;
+}
+
+/* Tight profile stats: single line each, ellipsis if needed */
+.profile-stats {
+  gap: 3px !important;
+  margin-top: 10px !important;
+  padding-top: 10px !important;
+}
+.ps-row {
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 4px 7px !important;
+}
+.ps-label {
+  width: 44px !important;
+  letter-spacing: 0.9px !important;
+}
+.ps-value {
+  font-size: 9.5px !important;
+  line-height: 1.35 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  text-align: right !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  letter-spacing: 0.1px !important;
+}
+
+/* Tighten service rows slightly so all 4 rows fit */
+.svc-list { padding: 8px 10px 10px !important; gap: 4px !important; }
+.svc-row  { padding: 5px 9px !important; }
+
+/* On narrow sidebars (<=1200px grid switches to 190/230),
+   remove any word-breaking and keep stats single-line */
+@media (max-width: 1200px) {
+  .ps-label { width: 40px !important; font-size: 8px !important; }
+  .ps-value { font-size: 9px !important; }
+}
