@@ -127,16 +127,10 @@
     try {
       const res = await fetch(`${API}/tokens`);
       const d = await res.json();
-      document.getElementById('totalTokens').textContent = d.totalTokens.toLocaleString();
-      document.getElementById('inputTokens').textContent = d.inputTokens.toLocaleString();
-      document.getElementById('outputTokens').textContent = d.outputTokens.toLocaleString();
-      document.getElementById('cacheReadTokens').textContent = d.cacheReadTokens.toLocaleString();
-      document.getElementById('apiRequests').textContent = d.requests.toLocaleString();
-      document.getElementById('llmMessages').textContent = d.messages.toLocaleString();
-
-      document.getElementById('reqCount').textContent = d.requests;
-      document.getElementById('proposalCount').textContent = d.messages;
-      document.getElementById('llmCallCount').textContent = d.messages;
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      set('reqCount', d.requests);
+      set('proposalCount', d.messages);
+      set('llmCallCount', d.messages);
     } catch (e) {
       console.error('Tokens fetch failed:', e);
     }
@@ -296,8 +290,8 @@
   const installModal = document.getElementById('installModal');
   const btnInstall = document.getElementById('btnInstall');
   const modalClose = document.getElementById('modalClose');
-  const optChromeStore = document.getElementById('optChromeStore');
   const optDownload = document.getElementById('optDownload');
+  const panelDownload = document.getElementById('panelDownload');
 
   function openInstallModal() { if (installModal) installModal.classList.add('open'); }
   function closeInstallModal() { if (installModal) installModal.classList.remove('open'); }
@@ -310,11 +304,11 @@
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeInstallModal();
   });
-  if (optChromeStore) optChromeStore.addEventListener('click', (e) => {
-    e.preventDefault();
-    showToast('Chrome Web Store listing — Coming Soon');
-  });
   if (optDownload) optDownload.addEventListener('click', () => {
+    showToast('Downloading Hermex extension...');
+    setTimeout(closeInstallModal, 300);
+  });
+  if (panelDownload) panelDownload.addEventListener('click', () => {
     showToast('Downloading Hermex extension...');
   });
 

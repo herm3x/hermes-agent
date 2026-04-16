@@ -43,22 +43,13 @@
       <p class="modal-sub">Prediction markets on X — pick your install method</p>
 
       <div class="modal-options">
-        <button class="modal-option" id="optChromeStore">
-          <div class="opt-icon">◈</div>
-          <div class="opt-text">
-            <div class="opt-title">Add to Chrome</div>
-            <div class="opt-desc">One-click install from Chrome Web Store</div>
-          </div>
-          <div class="opt-badge">Coming Soon</div>
-        </button>
-
-        <a class="modal-option" id="optDownload" href="/hermex-extension.zip" download>
+        <a class="modal-option primary" id="optDownload" href="/hermex-extension.zip" download>
           <div class="opt-icon">⬇</div>
           <div class="opt-text">
-            <div class="opt-title">Download ZIP</div>
-            <div class="opt-desc">Manual install · Developer Mode</div>
+            <div class="opt-title">Download Extension</div>
+            <div class="opt-desc">hermex-extension.zip · 330 KB</div>
           </div>
-          <div class="opt-badge available">Available</div>
+          <div class="opt-badge available">v0.1.0</div>
         </a>
       </div>
 
@@ -279,18 +270,53 @@
         </div>
       </div>
 
-      <!-- Token Usage -->
-      <div class="panel">
-        <div class="panel-header"><span class="ph-icon">◇</span> TOKEN USAGE
-          <span class="header-badges"><span class="badge green">TRACKED</span></span>
+      <!-- Install Extension -->
+      <div class="panel install-panel">
+        <div class="panel-header"><span class="ph-icon">⊕</span> INSTALL EXTENSION
+          <span class="header-badges"><span class="badge green">v0.1.0</span></span>
         </div>
-        <div class="token-grid">
-          <div class="token-row"><span class="token-label">Total tokens</span><span class="token-val" id="totalTokens">0</span></div>
-          <div class="token-row"><span class="token-label">Input tokens</span><span class="token-val" id="inputTokens">0</span></div>
-          <div class="token-row"><span class="token-label">Output tokens</span><span class="token-val" id="outputTokens">0</span></div>
-          <div class="token-row"><span class="token-label">Cache read</span><span class="token-val" id="cacheReadTokens">0</span></div>
-          <div class="token-row"><span class="token-label">API requests</span><span class="token-val" id="apiRequests">0</span></div>
-          <div class="token-row"><span class="token-label">LLM messages</span><span class="token-val" id="llmMessages">0</span></div>
+
+        <!-- Preview: in-feed prediction card mockup -->
+        <div class="ext-preview">
+          <div class="preview-label">IN-FEED CARD</div>
+          <div class="mock-card">
+            <div class="mock-card-head">
+              <img src="hermex-eye.png" class="mock-eye" alt="">
+              <div class="mock-title">
+                <div class="mock-name">HERMEX</div>
+                <div class="mock-sub">prediction · @NousResearch</div>
+              </div>
+              <div class="mock-live">● LIVE</div>
+            </div>
+            <div class="mock-question">Will Hermes Agent ship v1.0 by Q3 2026?</div>
+            <div class="mock-bars">
+              <div class="mock-bar yes"><span class="ml">YES</span><span class="mr">62%</span></div>
+              <div class="mock-bar no"><span class="ml">NO</span><span class="mr">38%</span></div>
+            </div>
+            <div class="mock-stats">
+              <span>Vol $48.2k</span>
+              <span>Liq $12.1k</span>
+              <span>▲ +3.2%</span>
+            </div>
+          </div>
+        </div>
+
+        <a class="install-cta" href="/hermex-extension.zip" download id="panelDownload">
+          <span class="install-cta-icon">⬇</span>
+          <span class="install-cta-text">
+            <span class="install-cta-title">Download Extension</span>
+            <span class="install-cta-sub">hermex-extension.zip · 330 KB</span>
+          </span>
+        </a>
+
+        <div class="install-steps">
+          <div class="is-title">QUICK INSTALL</div>
+          <ol class="is-list">
+            <li>Unzip the downloaded file</li>
+            <li>Open <code>chrome://extensions</code></li>
+            <li>Enable <b>Developer mode</b></li>
+            <li>Click <b>Load unpacked</b> → pick folder</li>
+          </ol>
         </div>
       </div>
 
