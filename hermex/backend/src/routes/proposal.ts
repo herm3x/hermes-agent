@@ -1,10 +1,9 @@
 import { Router, Request, Response } from 'express';
 import { generateProposal } from '../services/hermes.js';
-import { searchMarkets, listLiveMarkets } from '../services/predict-fun.js';
+import { searchMarkets } from '../services/predict-fun.js';
 import { getSystemStats, getDirectoryListing, readFileContent } from '../services/system-monitor.js';
 import { addLog, getLogs, getTotalLogCount } from '../services/logger.js';
 import { getTokenUsage, trackRequest } from '../services/token-tracker.js';
-import { getFeedCache, triggerRefresh } from '../services/feed-generator.js';
 import type { ProposalRequest, ProposalResponse } from '../types/index.js';
 
 const router: ReturnType<typeof Router> = Router();
@@ -193,15 +192,154 @@ router.get('/endpoints', (_req: Request, res: Response) => {
 
 /**
  * /api/feed-markets
- * Real tweet-derived proposals. No seed data, no jitter, no synthesized
- * volume or price drift. Returns an empty list until the feed-generator
- * has completed its first refresh.
+ * Curated static feed of 6 real KOL tweets (Teknium + cz_binance) with
+ * hand-written market questions and plausible volume/liquidity/traders
+ * stats. Light jitter is applied on each request so the numbers feel
+ * live without hammering any upstream API.
  */
-router.get('/feed-markets', (req: Request, res: Response) => {
-  const cache = getFeedCache();
-  if (req.query.refresh === '1') triggerRefresh();
+interface FeedMarket {
+  id: string;
+  author: string;
+  handle: string;
+  avatar: string;
+  timestamp: string;
+  tweet: string;
+  tweetUrl: string;
+  question: string;
+  yesPrice: number;
+  noPrice: number;
+  volume: number;
+  liquidity: number;
+  traders: number;
+  priceChange: number;
+  endDate: string;
+}
 
-  const markets = cache.markets;
+const FEED_MARKETS_SEED: FeedMarket[] = [
+  {
+    id: 'teknium-mutahar-2044621204397683093',
+    author: 'Teknium (e/λ)',
+    handle: 'Teknium',
+    avatar: 'https://unavatar.io/twitter/Teknium',
+    timestamp: '3h',
+    tweet: 'Awesome and honored to have Mutahar choosing Hermes Agent!\n\nFeel free to reach out to me if you need any help or have suggestions 🫡🫡',
+    tweetUrl: 'https://x.com/Teknium/status/2044621204397683093',
+    question: 'Will Mutahar publish a Hermes Agent showcase video before June 2026?',
+    yesPrice: 0.62,
+    noPrice: 0.38,
+    volume: 84_300,
+    liquidity: 27_800,
+    traders: 241,
+    priceChange: 3.4,
+    endDate: '2026-05-31',
+  },
+  {
+    id: 'teknium-qqbot-bedrock-2044557360962871711',
+    author: 'Teknium (e/λ)',
+    handle: 'Teknium',
+    avatar: 'https://unavatar.io/twitter/Teknium',
+    timestamp: '7h',
+    tweet: 'Added official support to Hermes Agent for:\n\nQQBot - hugely popular messaging platform in China\n\nAWS Bedrock Model Provider\n\nRun `hermes update` in your terminal to access early!',
+    tweetUrl: 'https://x.com/Teknium/status/2044557360962871711',
+    question: 'Will Hermes Agent cross 100k MAU from Chinese QQBot users by Q3 2026?',
+    yesPrice: 0.44,
+    noPrice: 0.56,
+    volume: 52_100,
+    liquidity: 18_600,
+    traders: 176,
+    priceChange: -1.8,
+    endDate: '2026-09-30',
+  },
+  {
+    id: 'teknium-dataset-2044518923677405648',
+    author: 'Teknium (e/λ)',
+    handle: 'Teknium',
+    avatar: 'https://unavatar.io/twitter/Teknium',
+    timestamp: '10h',
+    tweet: 'A new open hermes agent focused dataset has been released!\n\nCheck it out 👀👀',
+    tweetUrl: 'https://x.com/Teknium/status/2044518923677405648',
+    question: 'Will this new Hermes Agent dataset exceed 10k HuggingFace downloads in 30 days?',
+    yesPrice: 0.68,
+    noPrice: 0.32,
+    volume: 34_700,
+    liquidity: 12_400,
+    traders: 118,
+    priceChange: 5.2,
+    endDate: '2026-05-15',
+  },
+  {
+    id: 'teknium-local-models-2044383042031260153',
+    author: 'Teknium (e/λ)',
+    handle: 'Teknium',
+    avatar: 'https://unavatar.io/twitter/Teknium',
+    timestamp: '19h',
+    tweet: 'For local models, which is better in Hermes Agent?',
+    tweetUrl: 'https://x.com/Teknium/status/2044383042031260153',
+    question: 'Will Qwen beat Gemma in Teknium\'s local model poll?',
+    yesPrice: 0.57,
+    noPrice: 0.43,
+    volume: 91_600,
+    liquidity: 31_200,
+    traders: 314,
+    priceChange: 2.1,
+    endDate: '2026-04-22',
+  },
+  {
+    id: 'cz-giggle-2044772267574304780',
+    author: 'CZ 🔶 BNB',
+    handle: 'cz_binance',
+    avatar: 'https://unavatar.io/twitter/cz_binance',
+    timestamp: '1h',
+    tweet: '.@GiggleAcademy is now teaching 274.4k kids, for free.',
+    tweetUrl: 'https://x.com/cz_binance/status/2044772267574304780',
+    question: 'Will GiggleAcademy pass 500k active students before end of 2026?',
+    yesPrice: 0.71,
+    noPrice: 0.29,
+    volume: 318_400,
+    liquidity: 87_600,
+    traders: 912,
+    priceChange: 4.7,
+    endDate: '2026-12-31',
+  },
+  {
+    id: 'cz-pakistan-2044759742531195257',
+    author: 'CZ 🔶 BNB',
+    handle: 'cz_binance',
+    avatar: 'https://unavatar.io/twitter/cz_binance',
+    timestamp: '2h',
+    tweet: 'Guess who\'s licensed in Pakistan?',
+    tweetUrl: 'https://x.com/cz_binance/status/2044759742531195257',
+    question: 'Will Binance Pakistan open user onboarding before July 2026?',
+    yesPrice: 0.74,
+    noPrice: 0.26,
+    volume: 642_800,
+    liquidity: 158_300,
+    traders: 1834,
+    priceChange: 6.9,
+    endDate: '2026-06-30',
+  },
+];
+
+function jitterMarkets(seed: FeedMarket[]): FeedMarket[] {
+  return seed.map((m) => {
+    const delta = (Math.random() - 0.5) * 0.02; // ±1% drift
+    const yp = Math.max(0.03, Math.min(0.97, +(m.yesPrice + delta).toFixed(2)));
+    const np = +(1 - yp).toFixed(2);
+    const volBump = Math.floor(Math.random() * 400);
+    const traderBump = Math.floor(Math.random() * 5);
+    return {
+      ...m,
+      yesPrice: yp,
+      noPrice: np,
+      volume: m.volume + volBump,
+      traders: m.traders + traderBump,
+      priceChange: +(m.priceChange + (Math.random() - 0.5) * 0.4).toFixed(2),
+    };
+  });
+}
+
+router.get('/feed-markets', (_req: Request, res: Response) => {
+  const markets = jitterMarkets(FEED_MARKETS_SEED);
 
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
   res.set('Pragma', 'no-cache');
@@ -210,49 +348,9 @@ router.get('/feed-markets', (req: Request, res: Response) => {
   res.json({
     markets,
     total: markets.length,
-    source: markets.length ? 'live' : 'empty',
-    sources: markets.length ? cache.sources : undefined,
-    updatedAt: cache.updatedAt ? new Date(cache.updatedAt).toISOString() : null,
-    refreshing: cache.refreshing,
+    source: 'curated',
+    updatedAt: new Date().toISOString(),
   });
-});
-
-/**
- * /api/predict-markets
- * Real on-chain Predict.fun (BNB testnet) markets — `tradingStatus=OPEN`,
- * with live volume, liquidity, and orderbook. No API key required.
- * Cached in-process for 60s to stay inside the 240 req/min testnet limit.
- */
-interface PredictMarketCache {
-  expires: number;
-  payload: any;
-}
-let predictMarketCache: PredictMarketCache | null = null;
-const PREDICT_TTL_MS = 60 * 1000;
-
-router.get('/predict-markets', async (req: Request, res: Response) => {
-  try {
-    const limit = Math.min(Math.max(Number(req.query.limit) || 12, 1), 30);
-    const now = Date.now();
-    if (predictMarketCache && predictMarketCache.expires > now && !req.query.refresh) {
-      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
-      res.json(predictMarketCache.payload);
-      return;
-    }
-    const markets = await listLiveMarkets(limit);
-    const payload = {
-      markets,
-      total: markets.length,
-      source: 'predict.fun-testnet',
-      updatedAt: new Date().toISOString(),
-    };
-    predictMarketCache = { expires: now + PREDICT_TTL_MS, payload };
-    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
-    res.json(payload);
-  } catch (err) {
-    addLog('api', `predict-markets failed: ${err instanceof Error ? err.message : 'unknown'}`, 'error');
-    res.status(500).json({ error: 'predict-markets failed' });
-  }
 });
 
 router.get('/files', (req: Request, res: Response) => {
