@@ -27,9 +27,53 @@
     <div class="top-right">
       <span class="clock" id="clock">00:00:00</span>
       <button class="btn btn-default" id="btnBinance">BINANCE</button>
-      <button class="btn btn-accent" id="btnPredictFun">PREDICT.FUN</button>
+      <button class="btn btn-default" id="btnPredictFun">PREDICT.FUN</button>
+      <button class="btn btn-primary" id="btnInstall">⊕ INSTALL EXTENSION</button>
     </div>
   </header>
+
+  <!-- Install Modal -->
+  <div class="modal-overlay" id="installModal">
+    <div class="modal">
+      <button class="modal-close" id="modalClose" aria-label="Close">×</button>
+      <div class="modal-logo-wrap">
+        <img src="hermex-eye.png" alt="Hermex" class="modal-logo">
+      </div>
+      <h2 class="modal-title">Install Hermex</h2>
+      <p class="modal-sub">Prediction markets on X — pick your install method</p>
+
+      <div class="modal-options">
+        <button class="modal-option" id="optChromeStore">
+          <div class="opt-icon">◈</div>
+          <div class="opt-text">
+            <div class="opt-title">Add to Chrome</div>
+            <div class="opt-desc">One-click install from Chrome Web Store</div>
+          </div>
+          <div class="opt-badge">Coming Soon</div>
+        </button>
+
+        <a class="modal-option" id="optDownload" href="/hermex-extension.zip" download>
+          <div class="opt-icon">⬇</div>
+          <div class="opt-text">
+            <div class="opt-title">Download ZIP</div>
+            <div class="opt-desc">Manual install · Developer Mode</div>
+          </div>
+          <div class="opt-badge available">Available</div>
+        </a>
+      </div>
+
+      <div class="modal-instructions" id="modalInstructions">
+        <div class="mi-title">Manual install steps</div>
+        <ol class="mi-list">
+          <li>Unzip the downloaded file</li>
+          <li>Open <code>chrome://extensions</code> in Chrome</li>
+          <li>Toggle <b>Developer mode</b> (top right)</li>
+          <li>Click <b>Load unpacked</b> → select the unzipped folder</li>
+          <li>Pin the ☤ Hermex icon to your toolbar</li>
+        </ol>
+      </div>
+    </div>
+  </div>
 
   <div class="main-layout">
     <!-- LEFT SIDEBAR -->

@@ -292,6 +292,32 @@
   const btnPredictFun = document.getElementById('btnPredictFun');
   if (btnPredictFun) btnPredictFun.addEventListener('click', () => showToast('Predict.fun trading — Coming Soon'));
 
+  // ──── Install Extension Modal ────
+  const installModal = document.getElementById('installModal');
+  const btnInstall = document.getElementById('btnInstall');
+  const modalClose = document.getElementById('modalClose');
+  const optChromeStore = document.getElementById('optChromeStore');
+  const optDownload = document.getElementById('optDownload');
+
+  function openInstallModal() { if (installModal) installModal.classList.add('open'); }
+  function closeInstallModal() { if (installModal) installModal.classList.remove('open'); }
+
+  if (btnInstall) btnInstall.addEventListener('click', openInstallModal);
+  if (modalClose) modalClose.addEventListener('click', closeInstallModal);
+  if (installModal) installModal.addEventListener('click', (e) => {
+    if (e.target === installModal) closeInstallModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeInstallModal();
+  });
+  if (optChromeStore) optChromeStore.addEventListener('click', (e) => {
+    e.preventDefault();
+    showToast('Chrome Web Store listing — Coming Soon');
+  });
+  if (optDownload) optDownload.addEventListener('click', () => {
+    showToast('Downloading Hermex extension...');
+  });
+
   // ──── Terminal cursor ────
   const terminalBody = document.getElementById('terminal');
   if (terminalBody) {
