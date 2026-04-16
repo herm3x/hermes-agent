@@ -161,6 +161,25 @@ python -m pytest tests/ -q
 
 ---
 
+## ☤ Hermex — Prediction Markets on X
+
+This fork includes **Hermex**, a Chrome Extension + backend that turns KOL tweets into real-time prediction markets, powered by Hermes Agent.
+
+- Real-time tweet detection via MutationObserver
+- Hermes Agent (LLM) generates smart prediction market proposals in <3s
+- Predict.fun integration for live trading
+- Dashboard with system monitoring
+
+See the full docs: **[hermex/README.md](hermex/README.md)**
+
+```bash
+cd hermex/backend && cp .env.example .env && bun install && bun run dev
+cd hermex/chrome-extension && bun install && bun run build
+# Load hermex/chrome-extension/dist as unpacked extension in Chrome
+```
+
+---
+
 ## Community
 
 - 💬 [Discord](https://discord.gg/NousResearch)

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <header class="popup-header">
+      <div class="popup-logo-wrap">
+        <img src="assets/hermex-eye.jpg" onerror="this.src='assets/hermex-eye.png'" alt="Hermex" class="popup-logo-img">
+        <div class="popup-logo-glow"></div>
+      </div>
+      <pre class="popup-ascii-name">╦ ╦ ╔═╗ ╦═╗ ╔╦╗ ╔═╗ ═╗ ╦
+╠═╣ ║╣  ╠╦╝ ║║║ ║╣  ╔╩╦╝
+╩ ╩ ╚═╝ ╩╚═ ╩ ╩ ╚═╝ ╩ ╚═</pre>
+      <p class="subtitle">Prediction Markets on X</p>
+    </header>
+
+    <div class="popup-section">
+      <div class="toggle-row">
+        <label for="toggle-enabled">Enable Extension</label>
+        <input type="checkbox" id="toggle-enabled" checked>
+      </div>
+      <div class="toggle-row">
+        <label for="toggle-auto">Auto-propose on KOL tweets</label>
+        <input type="checkbox" id="toggle-auto" checked>
+      </div>
+      <div class="toggle-row">
+        <label for="toggle-testnet">Testnet Mode</label>
+        <input type="checkbox" id="toggle-testnet" checked>
+      </div>
+    </div>
+
+    <div class="popup-section">
+      <h3>Backend API URL</h3>
+      <input type="text" id="api-url" class="text-input" value="http://localhost:6088" placeholder="http://localhost:6088">
+    </div>
+
+    <div class="popup-section">
+      <h3>Min Followers for Auto-propose</h3>
+      <input type="number" id="min-followers" class="text-input" value="50000" min="0" step="1000">
+    </div>
+
+    <div class="popup-section">
+      <h3>KOL Whitelist (handles, one per line)</h3>
+      <textarea id="kol-whitelist" class="text-area" rows="4" placeholder="elonmusk&#10;VitalikButerin&#10;CZ_Binance"></textarea>
+    </div>
+
+    <div class="popup-section stats">
+      <div class="stat">
+        <span class="stat-value" id="proposals-today">0</span>
+        <span class="stat-label">Proposals Today</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="daily-limit">500</span>
+        <span class="stat-label">Daily Limit</span>
+      </div>
+    </div>
+
+    <button id="save-btn" class="save-btn">Save Settings</button>
+
+    <footer class="popup-footer">
+      <a href="https://predict.fun" target="_blank">Predict.fun</a>
+      <span>·</span>
+      <a href="https://github.com/herm3x/hermes-agent" target="_blank">Hermes Agent</a>
+    </footer>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
