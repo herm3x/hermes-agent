@@ -163,14 +163,40 @@ python -m pytest tests/ -q
 
 ## ☤ Hermex — Prediction Markets on X
 
-This fork includes **Hermex**, a Chrome Extension + backend that turns KOL tweets into real-time prediction markets, powered by Hermes Agent.
+<p align="center">
+  <img src="hermex/assets/hermex-eye.png" alt="Hermex" width="80" style="border-radius: 16px;">
+</p>
 
-- Real-time tweet detection via MutationObserver
-- Hermes Agent (LLM) generates smart prediction market proposals in <3s
-- Predict.fun integration for live trading
-- Dashboard with system monitoring
+<pre align="center">
+╦ ╦ ╔═╗ ╦═╗ ╔╦╗ ╔═╗ ═╗ ╦
+╠═╣ ║╣  ╠╦╝ ║║║ ║╣  ╔╩╦╝
+╩ ╩ ╚═╝ ╩╚═ ╩ ╩ ╚═╝ ╩ ╚═
+</pre>
 
-See the full docs: **[hermex/README.md](hermex/README.md)**
+<p align="center">
+  <a href="https://x.com/herm3x"><img src="https://img.shields.io/badge/𝕏-@herm3x-000000?style=flat-square&logo=x&logoColor=white" alt="X"></a>
+  <a href="https://predict.fun"><img src="https://img.shields.io/badge/Predict.fun-Testnet-6366f1?style=flat-square" alt="Predict.fun"></a>
+</p>
+
+This fork includes **Hermex** — a Chrome Extension + backend that turns every KOL tweet into a real-time prediction market, powered by Hermes Agent.
+
+<table>
+<tr>
+<td><img src="hermex/assets/hermex-feed-card.png" alt="Feed Card" width="500"></td>
+<td><img src="hermex/assets/hermex-popup.png" alt="Popup" width="350"></td>
+</tr>
+<tr>
+<td align="center"><b>Inline prediction card on X feed</b></td>
+<td align="center"><b>Extension popup settings</b></td>
+</tr>
+</table>
+
+- **Real-time detection** — MutationObserver watches your feed, zero polling
+- **Smart odds** — Hermes Agent generates context-aware probabilities in <3s
+- **Predict.fun** — Match existing markets or trade directly
+- **KOL-aware** — Volume/liquidity scaled to author influence
+
+**Full docs + setup → [hermex/README.md](hermex/README.md)**
 
 ```bash
 cd hermex/backend && cp .env.example .env && bun install && bun run dev
