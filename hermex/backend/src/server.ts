@@ -3,6 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import { config } from './config.js';
 import proposalRoutes from './routes/proposal.js';
+import { startFeedGenerator } from './services/feed-generator.js';
 
 const app: ReturnType<typeof express> = express();
 
@@ -37,6 +38,8 @@ app.listen(config.port, () => {
   ────────────────────────────────
   Ready at  http://localhost:${config.port}
   `);
+  // Kick off background KOL feed generation (fetch real tweets → LLM → market)
+  startFeedGenerator();
 });
 
 export default app;

@@ -4,6 +4,7 @@ import { searchMarkets } from '../services/predict-fun.js';
 import { getSystemStats, getDirectoryListing, readFileContent } from '../services/system-monitor.js';
 import { addLog, getLogs, getTotalLogCount } from '../services/logger.js';
 import { getTokenUsage, trackRequest } from '../services/token-tracker.js';
+import { getFeedCache, triggerRefresh } from '../services/feed-generator.js';
 import type { ProposalRequest, ProposalResponse } from '../types/index.js';
 
 const router: ReturnType<typeof Router> = Router();
@@ -332,9 +333,23 @@ function jitterMarkets(seed: FeedMarket[]): FeedMarket[] {
   });
 }
 
-router.get('/feed-markets', (_req: Request, res: Response) => {
-  const markets = jitterMarkets(FEED_MARKETS_SEED);
-  res.json({ markets, total: markets.length, updatedAt: new Date().toISOString() });
+router.get('/feed-markets', (req: Request, res: Response) => {
+  const cache = getFeedCache();
+  if (req.query.refresh === '1') triggerRefresh();
+
+  // Prefer real (cached) markets, fall back to seeded defaults
+  const base = cache.markets.length ? cache.markets : FEED_MARKETS_SEED;
+  const markets = jitterMarkets(base);
+  res.json({
+    markets,
+    total: markets.length,
+    source: cache.markets.length ? 'live' : 'seed',
+    sources: cache.markets.length ? cache.sources : undefined,
+    updatedAt: cache.markets.length
+      ? new Date(cache.updatedAt).toISOString()
+      : new Date().toISOString(),
+    refreshing: cache.refreshing,
+  });
 });
 
 router.get('/files', (req: Request, res: Response) => {

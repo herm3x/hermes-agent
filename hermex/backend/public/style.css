@@ -2503,13 +2503,67 @@ body::before {
   line-height: 1.45;
 }
 .logs-panel-side .log-line {
-  padding: 3px 0;
-  gap: 4px;
-  flex-wrap: wrap;
+  display: block;
+  padding: 5px 7px;
+  margin-bottom: 3px;
+  border-radius: 5px;
+  border-left: 2px solid rgba(99, 102, 241, 0.25);
+  background: rgba(15, 23, 42, 0.4);
 }
-.logs-panel-side .log-time { font-size: 8px; }
-.logs-panel-side .log-level { font-size: 8px; padding: 0 4px; }
-.logs-panel-side .log-msg { font-size: 9px; word-break: break-word; }
-.logs-panel-side .api-line { padding: 3px 4px; }
-.logs-panel-side .log-method { font-size: 8px; padding: 1px 4px; }
-.logs-panel-side .log-path { font-size: 9px; }
+.logs-panel-side .log-line:hover {
+  background: rgba(99, 102, 241, 0.08);
+  border-left-color: rgba(99, 102, 241, 0.55);
+}
+.logs-panel-side .log-line.error { border-left-color: var(--red); background: rgba(239, 68, 68, 0.08); }
+.logs-panel-side .log-line.info { border-left-color: var(--cyan, #60a5fa); }
+.logs-panel-side .log-ts {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  color: rgba(203, 213, 225, 0.42);
+  margin-right: 6px;
+  opacity: 0.9;
+  min-width: 0;
+  letter-spacing: 0.2px;
+}
+.logs-panel-side .log-src {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(99, 102, 241, 0.14);
+  color: #a5b4fc;
+  min-width: 0;
+  border: 1px solid rgba(99, 102, 241, 0.22);
+}
+.logs-panel-side .log-line.error .log-src {
+  background: rgba(239, 68, 68, 0.18);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+.logs-panel-side .log-msg {
+  display: block;
+  margin-top: 3px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  color: rgba(203, 213, 225, 0.82);
+  line-height: 1.45;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+.logs-panel-side .api-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  margin-bottom: 2px;
+  border-left: none;
+  background: transparent;
+  border-bottom: 1px dashed rgba(99, 102, 241, 0.1);
+}
+.logs-panel-side .api-line:hover { background: rgba(99, 102, 241, 0.06); }
+.logs-panel-side .log-method { font-size: 8px; padding: 1px 5px; }
+.logs-panel-side .log-path { font-size: 10px; word-break: break-all; }
