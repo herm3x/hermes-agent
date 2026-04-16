@@ -301,6 +301,6 @@
   }
 
   // ──── Init ────
-  loadDirectory('/Users/baoger/hermex');
+  loadDirectory('.');
 
 })();
