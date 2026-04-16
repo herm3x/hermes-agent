@@ -340,6 +340,13 @@ router.get('/feed-markets', (req: Request, res: Response) => {
   // Prefer real (cached) markets, fall back to seeded defaults
   const base = cache.markets.length ? cache.markets : FEED_MARKETS_SEED;
   const markets = jitterMarkets(base);
+
+  // This response is live-updated every 10min on the server; disable all
+  // browser/proxy caching so UI always reflects latest prices & new tweets.
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+
   res.json({
     markets,
     total: markets.length,

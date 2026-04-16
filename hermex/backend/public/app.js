@@ -458,7 +458,7 @@
 
   async function fetchFeedMarkets() {
     try {
-      const res = await fetch(`${API}/feed-markets`);
+      const res = await fetch(`${API}/feed-markets?t=${Date.now()}`, { cache: 'no-store' });
       const d = await res.json();
       renderMarkets(d.markets || []);
     } catch (e) {
