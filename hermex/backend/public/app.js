@@ -166,16 +166,29 @@
   setInterval(fetchTokens, 4000);
   fetchTokens();
 
-  // ──── File Explorer ────
+  // ──── File Explorer (sandboxed relative paths) ────
+  function joinPath(base, name) {
+    if (!base || base === '.') return name;
+    return base + '/' + name;
+  }
+  function parentPath(p) {
+    if (!p || p === '.' || !p.includes('/')) return '.';
+    return p.split('/').slice(0, -1).join('/') || '.';
+  }
+
   async function loadDirectory(dir) {
     try {
       const res = await fetch(`${API}/files?dir=${encodeURIComponent(dir)}`);
       const d = await res.json();
-      currentFileDir = d.path;
-      document.getElementById('currentDir').textContent = d.path;
+      currentFileDir = d.path || '.';
+      const display = currentFileDir === '.' ? '~/hermex' : `~/hermex/${currentFileDir}`;
+      document.getElementById('currentDir').textContent = display;
+
+      const btnUp = document.getElementById('btnBackDir');
+      if (btnUp) btnUp.disabled = (currentFileDir === '.');
 
       const container = document.getElementById('fileTreeItems');
-      if (!d.entries.length) {
+      if (!d.entries || !d.entries.length) {
         container.innerHTML = '<div class="file-item dim">(empty)</div>';
         return;
       }
@@ -189,8 +202,9 @@
         item.addEventListener('click', () => {
           const name = item.dataset.name;
           const type = item.dataset.type;
-          if (type === 'directory') loadDirectory(currentFileDir + '/' + name);
-          else loadFilePreview(currentFileDir + '/' + name);
+          const next = joinPath(currentFileDir, name);
+          if (type === 'directory') loadDirectory(next);
+          else loadFilePreview(next);
           container.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
           item.classList.add('active');
         });
@@ -215,9 +229,8 @@
   }
 
   document.getElementById('btnBackDir').addEventListener('click', () => {
-    if (!currentFileDir) return;
-    const parent = currentFileDir.split('/').slice(0, -1).join('/') || '/';
-    loadDirectory(parent);
+    if (!currentFileDir || currentFileDir === '.') return;
+    loadDirectory(parentPath(currentFileDir));
   });
 
   // ──── Services Status ────

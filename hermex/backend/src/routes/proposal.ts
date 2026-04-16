@@ -191,9 +191,9 @@ router.get('/endpoints', (_req: Request, res: Response) => {
 });
 
 router.get('/files', (req: Request, res: Response) => {
-  const dir = (req.query.dir as string) || process.cwd();
-  const entries = getDirectoryListing(dir);
-  res.json({ path: dir, entries });
+  const dir = (req.query.dir as string) || '.';
+  const result = getDirectoryListing(dir);
+  res.json(result);
 });
 
 router.get('/files/read', (req: Request, res: Response) => {

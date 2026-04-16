@@ -70,12 +70,30 @@ export function getSystemStats() {
   };
 }
 
-export function getDirectoryListing(dirPath: string): Array<{ name: string; type: 'file' | 'directory'; size?: string }> {
+// Sandbox root: only expose files inside this directory (project root)
+const FILE_ROOT = path.resolve(process.cwd(), '..');
+
+function safeResolve(relPath: string): string | null {
+  const cleaned = (relPath || '.').replace(/^[\/\\]+/, '').replace(/\.\.+/g, '.');
+  const resolved = path.resolve(FILE_ROOT, cleaned);
+  if (resolved !== FILE_ROOT && !resolved.startsWith(FILE_ROOT + path.sep)) {
+    return null;
+  }
+  return resolved;
+}
+
+function toRelative(absPath: string): string {
+  const rel = path.relative(FILE_ROOT, absPath);
+  return rel === '' ? '.' : rel;
+}
+
+export function getDirectoryListing(dirPath: string): { path: string; entries: Array<{ name: string; type: 'file' | 'directory'; size?: string }> } {
+  const resolved = safeResolve(dirPath);
+  if (!resolved) return { path: '.', entries: [] };
   try {
-    const resolved = path.resolve(dirPath);
     const entries = fs.readdirSync(resolved, { withFileTypes: true });
-    return entries
-      .filter(e => !e.name.startsWith('.') && e.name !== 'node_modules')
+    const list = entries
+      .filter(e => !e.name.startsWith('.') && e.name !== 'node_modules' && e.name !== 'dist')
       .sort((a, b) => {
         if (a.isDirectory() && !b.isDirectory()) return -1;
         if (!a.isDirectory() && b.isDirectory()) return 1;
@@ -95,15 +113,18 @@ export function getDirectoryListing(dirPath: string): Array<{ name: string; type
         }
         return item;
       });
+    return { path: toRelative(resolved), entries: list };
   } catch {
-    return [];
+    return { path: toRelative(resolved), entries: [] };
   }
 }
 
 export function readFileContent(filePath: string): { content: string; size: string } | null {
+  const resolved = safeResolve(filePath);
+  if (!resolved) return null;
   try {
-    const resolved = path.resolve(filePath);
     const stat = fs.statSync(resolved);
+    if (!stat.isFile()) return null;
     if (stat.size > 100_000) {
       return { content: '(File too large to display)', size: formatBytes(stat.size) };
     }
