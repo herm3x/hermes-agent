@@ -3517,3 +3517,44 @@ body.docs-body { overflow-y: auto; }
   .ps-label { width: 40px !important; font-size: 8px !important; }
   .ps-value { font-size: 9px !important; }
 }
+
+/* ============================================================
+   2026-04-16 MERGE: Services into Profile card (single card)
+   ============================================================ */
+.profile-services {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(91, 154, 255, 0.12);
+}
+.ps-section-title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  color: var(--white-glow);
+  padding: 0 4px 6px;
+  text-transform: uppercase;
+}
+.ps-section-title .ph-icon {
+  font-size: 10px;
+  color: var(--accent);
+}
+.profile-services .svc-list {
+  padding: 0 !important;
+  margin: 0;
+  gap: 3px !important;
+}
+.profile-services .svc-row {
+  padding: 4px 8px !important;
+  font-size: 9.5px;
+}
+.profile-services .svc-name {
+  font-size: 9.5px;
+}
+.profile-services .svc-tag {
+  font-size: 8px;
+  padding: 1px 5px;
+}
