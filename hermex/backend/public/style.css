@@ -1144,17 +1144,17 @@ body::before {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 7px;
   margin: 0 0 2px;
-  padding: 11px 13px;
-  background: linear-gradient(145deg, rgba(15, 31, 58, 0.95), rgba(20, 40, 75, 0.9));
-  border: 1px solid rgba(99, 102, 241, 0.35);
-  border-radius: 14px;
+  padding: 6px 10px;
+  background: linear-gradient(145deg, rgba(15, 31, 58, 0.88), rgba(20, 40, 75, 0.82));
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 9px;
   text-decoration: none;
   color: #e0ecff;
   font-family: 'JetBrains Mono', monospace;
-  box-shadow: 0 8px 24px rgba(30, 64, 175, 0.25), 0 0 0 1px rgba(59, 130, 246, 0.08) inset;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  box-shadow: 0 3px 10px rgba(30, 64, 175, 0.18), 0 0 0 1px rgba(59, 130, 246, 0.05) inset;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -1176,9 +1176,9 @@ body::before {
   pointer-events: none;
 }
 .download-hero:hover {
-  transform: translateY(-2px);
-  border-color: rgba(147, 197, 253, 0.55);
-  box-shadow: 0 14px 34px rgba(30, 64, 175, 0.4), 0 0 24px rgba(99, 102, 241, 0.25);
+  transform: translateY(-1px);
+  border-color: rgba(147, 197, 253, 0.5);
+  box-shadow: 0 6px 18px rgba(30, 64, 175, 0.32), 0 0 14px rgba(99, 102, 241, 0.2);
 }
 .download-hero:hover::after { transform: translateX(120%); }
 .download-hero:active { transform: translateY(-1px); }
@@ -1186,26 +1186,26 @@ body::before {
 .download-hero .dh-icon-wrap {
   position: relative;
   z-index: 1;
-  width: 26px;
-  height: 26px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.28), rgba(99, 102, 241, 0.2));
-  border: 1px solid rgba(147, 197, 253, 0.35);
-  border-radius: 7px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.22), rgba(99, 102, 241, 0.16));
+  border: 1px solid rgba(147, 197, 253, 0.28);
+  border-radius: 5px;
   color: #93c5fd;
-  box-shadow: 0 0 12px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.15);
 }
 .download-hero .dh-label {
   position: relative;
   z-index: 1;
   flex: 1;
   min-width: 0;
-  font-size: 10.5px;
+  font-size: 9.5px;
   font-weight: 700;
-  letter-spacing: 1.4px;
+  letter-spacing: 1.2px;
   color: #e0ecff;
   white-space: nowrap;
   overflow: hidden;
@@ -1214,9 +1214,9 @@ body::before {
 .download-hero .dh-arrow {
   position: relative;
   z-index: 1;
-  font-size: 13px;
+  font-size: 11px;
   color: #93c5fd;
-  opacity: 0.7;
+  opacity: 0.65;
   transition: transform 0.3s ease, opacity 0.3s ease;
 }
 .download-hero:hover .dh-arrow {
