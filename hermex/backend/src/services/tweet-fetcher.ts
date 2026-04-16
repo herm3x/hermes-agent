@@ -20,6 +20,8 @@ export interface RawTweet {
 
 const X_BEARER_TOKEN = process.env.X_BEARER_TOKEN || '';
 
+const XTRACKER_BASE = (process.env.XTRACKER_BASE || 'https://xtracker.polymarket.com/api').replace(/\/$/, '');
+
 const RSSHUB_BASE = (process.env.RSSHUB_BASE || 'https://rsshub.app').replace(/\/$/, '');
 
 const NITTER_HOSTS = [
@@ -206,6 +208,54 @@ async function fetchFromXApi(username: string, limit: number): Promise<RawTweet[
   }
 }
 
+/**
+ * Polymarket's XTracker — the same pipeline Polymarket uses to monitor
+ * politicians/traders for their markets. Public, unauthenticated.
+ * Covers a curated list (cz_binance, elonmusk, WhiteHouse, tedcruz, etc.)
+ */
+async function fetchFromXTracker(username: string, limit: number): Promise<RawTweet[] | null> {
+  try {
+    const url = `${XTRACKER_BASE}/users/${encodeURIComponent(username)}/posts?platform=X`;
+    const res = await withTimeout(fetch(url), 8000);
+    if (!res.ok) return null;
+    const body: any = await res.json();
+    const posts: any[] = Array.isArray(body) ? body : body?.data || [];
+    if (!posts.length) return null;
+
+    const cleaned: RawTweet[] = [];
+    for (const p of posts) {
+      let text: string = (p.content || p.text || '').trim();
+      if (!text) continue;
+
+      // Skip retweets — XTracker includes them as "RT @user: ..."
+      if (/^RT\s+@\w+:/i.test(text)) continue;
+
+      // Strip ALL t.co URLs (media / quote shortlinks), collapse whitespace
+      text = text
+        .replace(/(?:^|\s+)https?:\/\/t\.co\/\S+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      // Drop trivial tweets (pure URL / single-word reply / very short)
+      if (text.length < 20) continue;
+      // Drop tweets that are just a URL after t.co stripping
+      if (/^https?:\/\//.test(text)) continue;
+
+      cleaned.push({
+        id: p.id || p.platformId || `xt-${Math.random().toString(36).slice(2)}`,
+        text: text.slice(0, 420),
+        url: p.url || `https://x.com/${username}/status/${p.platformId || p.id || ''}`,
+        createdAt: p.createdAt || p.importedAt || new Date().toISOString(),
+        author: username,
+      });
+      if (cleaned.length >= limit) break;
+    }
+    return cleaned.length ? cleaned : null;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchFromRssHub(username: string, limit: number): Promise<RawTweet[] | null> {
   try {
     const url = `${RSSHUB_BASE}/twitter/user/${encodeURIComponent(username)}`;
@@ -238,22 +288,36 @@ async function fetchFromNitter(username: string, limit: number): Promise<RawTwee
 export async function fetchRecentTweets(
   username: string,
   limit = 3,
-): Promise<{ tweets: RawTweet[]; source: 'x-api' | 'rsshub' | 'nitter' | 'none' }> {
+): Promise<{ tweets: RawTweet[]; source: 'x-api' | 'xtracker' | 'rsshub' | 'nitter' | 'none' }> {
+  // 1. Official X API — highest fidelity (requires paid bearer token)
   let tweets = await fetchFromXApi(username, limit);
   if (tweets && tweets.length) {
     addLog('tweet_fetch', `@${username}: ${tweets.length} tweets via x-api`);
     return { tweets, source: 'x-api' };
   }
+
+  // 2. Polymarket XTracker — free, first-party, but only ~8 tracked accounts
+  //    (cz_binance, elonmusk, WhiteHouse, tedcruz, ZelenskyyUa, etc.)
+  tweets = await fetchFromXTracker(username, limit);
+  if (tweets && tweets.length) {
+    addLog('tweet_fetch', `@${username}: ${tweets.length} tweets via xtracker`);
+    return { tweets, source: 'xtracker' };
+  }
+
+  // 3. RSSHub public instance
   tweets = await fetchFromRssHub(username, limit);
   if (tweets && tweets.length) {
     addLog('tweet_fetch', `@${username}: ${tweets.length} tweets via rsshub`);
     return { tweets, source: 'rsshub' };
   }
+
+  // 4. Nitter RSS — fallback of last resort
   tweets = await fetchFromNitter(username, limit);
   if (tweets && tweets.length) {
     addLog('tweet_fetch', `@${username}: ${tweets.length} tweets via nitter`);
     return { tweets, source: 'nitter' };
   }
+
   addLog('tweet_fetch', `@${username}: all sources failed, using seed fallback`, 'warn');
   return { tweets: [], source: 'none' };
 }

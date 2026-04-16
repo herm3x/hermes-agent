@@ -40,9 +40,10 @@ interface KOL {
 }
 
 const TRACKED_KOLS: KOL[] = [
-  { handle: 'cz_binance', name: 'CZ 🔶 BNB', tweetsPerRefresh: 4, tier: 'S' },
-  { handle: 'Teknium', name: 'Teknium', tweetsPerRefresh: 4, tier: 'A' },
-  { handle: 'NousResearch', name: 'Nous Research', tweetsPerRefresh: 4, tier: 'A' },
+  { handle: 'elonmusk', name: 'Elon Musk', tweetsPerRefresh: 3, tier: 'S' },
+  { handle: 'cz_binance', name: 'CZ 🔶 BNB', tweetsPerRefresh: 3, tier: 'S' },
+  { handle: 'Teknium', name: 'Teknium', tweetsPerRefresh: 3, tier: 'A' },
+  { handle: 'NousResearch', name: 'Nous Research', tweetsPerRefresh: 3, tier: 'A' },
 ];
 
 const REFRESH_MS = Number(process.env.FEED_REFRESH_MS || 10 * 60 * 1000);
