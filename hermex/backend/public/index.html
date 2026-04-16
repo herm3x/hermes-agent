@@ -26,45 +26,63 @@
     </div>
     <div class="top-right">
       <span class="clock" id="clock">00:00:00</span>
-      <button class="btn btn-default" id="btnBinance">BINANCE</button>
-      <button class="btn btn-default" id="btnPredictFun">PREDICT.FUN</button>
-      <button class="btn btn-primary" id="btnInstall">⊕ INSTALL EXTENSION</button>
+      <button class="btn btn-binance" id="btnBinance">
+        <span class="btn-binance-icon">
+          <svg viewBox="0 0 126.61 126.61" width="14" height="14" fill="currentColor"><g><path d="M38.73,53.2l24.59-24.58,24.6,24.6,14.3-14.31L63.32,0,24.42,38.9L38.73,53.2z"/><polygon points="0,63.31 14.3,49 28.6,63.3 14.3,77.61"/><path d="M38.73,73.41l24.59,24.59,24.6-24.6,14.31,14.29l-38.9,38.91L24.42,87.71l-0.01-0.01L38.73,73.41z"/><polygon points="98.01,63.31 112.31,49 126.61,63.31 112.31,77.61"/><path d="M77.83,63.3h0.01L63.32,48.79L52.59,59.52l-1.24,1.23l-2.54,2.54l-0.02,0.02l0.02,0.02l14.51,14.5l14.51-14.5l0.01-0.01L77.83,63.3z"/></g></svg>
+        </span>
+        <span id="btnBinanceLabel">CONNECT BINANCE</span>
+      </button>
     </div>
   </header>
 
-  <!-- Install Modal -->
-  <div class="modal-overlay" id="installModal">
-    <div class="modal">
-      <button class="modal-close" id="modalClose" aria-label="Close">×</button>
-      <div class="modal-logo-wrap">
-        <img src="hermex-eye.png" alt="Hermex" class="modal-logo">
+  <!-- Binance Connect Modal -->
+  <div class="modal-overlay" id="binanceModal">
+    <div class="modal binance-modal">
+      <button class="modal-close" id="binanceModalClose" aria-label="Close">×</button>
+      <div class="binance-logo-wrap">
+        <svg viewBox="0 0 126.61 126.61" width="56" height="56" fill="#F3BA2F"><g><path d="M38.73,53.2l24.59-24.58,24.6,24.6,14.3-14.31L63.32,0,24.42,38.9L38.73,53.2z"/><polygon points="0,63.31 14.3,49 28.6,63.3 14.3,77.61"/><path d="M38.73,73.41l24.59,24.59,24.6-24.6,14.31,14.29l-38.9,38.91L24.42,87.71l-0.01-0.01L38.73,73.41z"/><polygon points="98.01,63.31 112.31,49 126.61,63.31 112.31,77.61"/><path d="M77.83,63.3h0.01L63.32,48.79L52.59,59.52l-1.24,1.23l-2.54,2.54l-0.02,0.02l0.02,0.02l14.51,14.5l14.51-14.5l0.01-0.01L77.83,63.3z"/></g></svg>
       </div>
-      <h2 class="modal-title">Install Hermex</h2>
-      <p class="modal-sub">Prediction markets on X — pick your install method</p>
+      <h2 class="modal-title">Binance Web3 Wallet</h2>
+      <p class="modal-sub" id="binanceModalSub">Connect to place prediction market bets</p>
 
-      <div class="modal-options">
-        <a class="modal-option primary" id="optDownload" href="/hermex-extension.zip" download>
-          <div class="opt-icon">⬇</div>
-          <div class="opt-text">
-            <div class="opt-title">Download Extension</div>
-            <div class="opt-desc">hermex-extension.zip · 330 KB</div>
+      <div id="binanceConnectedPane" class="bnc-pane" style="display:none">
+        <div class="bnc-status-dot"></div>
+        <div class="bnc-addr-label">CONNECTED</div>
+        <div class="bnc-addr" id="bnbAddr">0x0000...0000</div>
+        <div class="bnc-chain" id="bnbChain">BNB Smart Chain</div>
+        <div class="bnc-actions">
+          <button class="btn btn-default" id="bnbCopy">COPY ADDRESS</button>
+          <button class="btn btn-default" id="bnbDisconnect">DISCONNECT</button>
+        </div>
+      </div>
+
+      <div id="binanceDisconnectedPane" class="bnc-pane">
+        <div class="bnc-methods">
+          <button class="bnc-method" id="bnbConnectInjected">
+            <span class="bnc-method-icon">⚡</span>
+            <span class="bnc-method-text">
+              <span class="bnc-method-title">Connect Directly</span>
+              <span class="bnc-method-sub" id="bnbMethodSub">Binance Wallet detected</span>
+            </span>
+            <span class="bnc-method-arrow">→</span>
+          </button>
+
+          <div class="bnc-divider"><span>OR</span></div>
+
+          <div class="bnc-qr-wrap">
+            <div class="bnc-qr-label">SCAN IN BINANCE APP</div>
+            <div class="bnc-qr" id="bnbQr"></div>
+            <div class="bnc-qr-hint">Open Binance App → DApp Browser → Scan</div>
           </div>
-          <div class="opt-badge available">v0.1.0</div>
-        </a>
-      </div>
+        </div>
 
-      <div class="modal-instructions" id="modalInstructions">
-        <div class="mi-title">Manual install steps</div>
-        <ol class="mi-list">
-          <li>Unzip the downloaded file</li>
-          <li>Open <code>chrome://extensions</code> in Chrome</li>
-          <li>Toggle <b>Developer mode</b> (top right)</li>
-          <li>Click <b>Load unpacked</b> → select the unzipped folder</li>
-          <li>Pin the ☤ Hermex icon to your toolbar</li>
-        </ol>
+        <a class="bnc-download" href="https://www.binance.com/en/download" target="_blank" rel="noopener">
+          Don't have Binance App? Download →
+        </a>
       </div>
     </div>
   </div>
+
 
   <div class="main-layout">
     <!-- LEFT SIDEBAR -->
@@ -301,25 +319,13 @@
           </span>
         </a>
 
-      </div>
-
-      <!-- Active Model -->
-      <div class="panel">
-        <div class="panel-header"><span class="ph-icon">◈</span> ACTIVE MODEL</div>
-        <div class="models-list">
-          <div class="model-item active">
-            <span class="model-name">hermes-3-llama-3.1-405b</span>
-            <span class="model-cost accent">ACTIVE</span>
-          </div>
-          <div class="model-item">
-            <span class="model-name">Provider: OpenRouter</span>
-            <span class="model-cost">API v1</span>
-          </div>
-          <div class="model-item">
-            <span class="model-name">Max tokens: 500</span>
-            <span class="model-cost">Temp: 0.7</span>
-          </div>
+        <div class="install-meta">
+          <span class="meta-chip"><span class="chip-dot green"></span>Free</span>
+          <span class="meta-chip">330 KB</span>
+          <span class="meta-chip">Chrome</span>
+          <span class="meta-chip">MIT</span>
         </div>
+
       </div>
 
       <!-- Tools -->

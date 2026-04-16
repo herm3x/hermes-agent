@@ -317,38 +317,162 @@
     }).join('');
   }
 
-  // ──── Top-right buttons (Binance / Predict.fun) ────
-  const btnBinance = document.getElementById('btnBinance');
-  if (btnBinance) btnBinance.addEventListener('click', () => showToast('Binance integration — Coming Soon'));
-
-  const btnPredictFun = document.getElementById('btnPredictFun');
-  if (btnPredictFun) btnPredictFun.addEventListener('click', () => showToast('Predict.fun trading — Coming Soon'));
-
-  // ──── Install Extension Modal ────
-  const installModal = document.getElementById('installModal');
-  const btnInstall = document.getElementById('btnInstall');
-  const modalClose = document.getElementById('modalClose');
-  const optDownload = document.getElementById('optDownload');
+  // ──── Download tracking ────
   const panelDownload = document.getElementById('panelDownload');
-
-  function openInstallModal() { if (installModal) installModal.classList.add('open'); }
-  function closeInstallModal() { if (installModal) installModal.classList.remove('open'); }
-
-  if (btnInstall) btnInstall.addEventListener('click', openInstallModal);
-  if (modalClose) modalClose.addEventListener('click', closeInstallModal);
-  if (installModal) installModal.addEventListener('click', (e) => {
-    if (e.target === installModal) closeInstallModal();
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeInstallModal();
-  });
-  if (optDownload) optDownload.addEventListener('click', () => {
-    showToast('Downloading Hermex extension...');
-    setTimeout(closeInstallModal, 300);
-  });
   if (panelDownload) panelDownload.addEventListener('click', () => {
     showToast('Downloading Hermex extension...');
   });
+
+  // ──── Binance Web3 Wallet Connect ────
+  // docs: https://developers.binance.com/docs/binance-w3w/evm-compatible-provider
+  const btnBinance = document.getElementById('btnBinance');
+  const btnBinanceLabel = document.getElementById('btnBinanceLabel');
+  const binanceModal = document.getElementById('binanceModal');
+  const binanceModalClose = document.getElementById('binanceModalClose');
+  const bnbConnectInjected = document.getElementById('bnbConnectInjected');
+  const bnbDisconnect = document.getElementById('bnbDisconnect');
+  const bnbCopy = document.getElementById('bnbCopy');
+  const bnbAddrEl = document.getElementById('bnbAddr');
+  const bnbChainEl = document.getElementById('bnbChain');
+  const bnbMethodSub = document.getElementById('bnbMethodSub');
+  const bnbQr = document.getElementById('bnbQr');
+  const connectedPane = document.getElementById('binanceConnectedPane');
+  const disconnectedPane = document.getElementById('binanceDisconnectedPane');
+
+  const CHAIN_NAMES = {
+    '0x1': 'Ethereum Mainnet',
+    '0x38': 'BNB Smart Chain',
+    '0x61': 'BSC Testnet',
+    '0xa4b1': 'Arbitrum One',
+    '0x89': 'Polygon',
+    '0x2105': 'Base',
+  };
+
+  function getBinanceProvider() {
+    if (typeof window !== 'undefined') {
+      if (window.binancew3w && window.binancew3w.ethereum) return window.binancew3w.ethereum;
+      if (window.ethereum && window.ethereum.isBinance) return window.ethereum;
+    }
+    return null;
+  }
+
+  function shortenAddr(addr) {
+    if (!addr) return '';
+    return addr.slice(0, 6) + '...' + addr.slice(-4);
+  }
+
+  function setConnectedUI(addr, chainId) {
+    if (!btnBinanceLabel) return;
+    btnBinance.classList.add('connected');
+    btnBinanceLabel.textContent = shortenAddr(addr);
+    if (bnbAddrEl) bnbAddrEl.textContent = addr;
+    if (bnbChainEl) bnbChainEl.textContent = CHAIN_NAMES[chainId] || `Chain ${chainId}`;
+    if (connectedPane) connectedPane.style.display = '';
+    if (disconnectedPane) disconnectedPane.style.display = 'none';
+    try { localStorage.setItem('hermex_wallet', addr); } catch {}
+  }
+
+  function setDisconnectedUI() {
+    if (!btnBinanceLabel) return;
+    btnBinance.classList.remove('connected');
+    btnBinanceLabel.textContent = 'CONNECT BINANCE';
+    if (connectedPane) connectedPane.style.display = 'none';
+    if (disconnectedPane) disconnectedPane.style.display = '';
+    try { localStorage.removeItem('hermex_wallet'); } catch {}
+  }
+
+  async function connectViaInjected() {
+    const provider = getBinanceProvider();
+    if (!provider) {
+      showToast('Binance Wallet not detected — open this page in Binance App');
+      return;
+    }
+    try {
+      const accounts = await provider.request({ method: 'eth_requestAccounts' });
+      if (!accounts || !accounts.length) { showToast('No accounts returned'); return; }
+      let chainId = '0x1';
+      try { chainId = await provider.request({ method: 'eth_chainId' }); } catch {}
+      setConnectedUI(accounts[0], chainId);
+      showToast('Connected to Binance Web3 Wallet');
+
+      provider.on && provider.on('accountsChanged', (accs) => {
+        if (!accs || !accs.length) setDisconnectedUI();
+        else {
+          const cid = (bnbChainEl && bnbChainEl.dataset.chainId) || '0x1';
+          setConnectedUI(accs[0], cid);
+        }
+      });
+      provider.on && provider.on('chainChanged', (cid) => {
+        const existing = bnbAddrEl ? bnbAddrEl.textContent : '';
+        if (existing) setConnectedUI(existing, cid);
+      });
+    } catch (err) {
+      console.error('[Binance] connect error:', err);
+      showToast('Connection rejected');
+    }
+  }
+
+  function openBinanceModal() {
+    if (!binanceModal) return;
+    const provider = getBinanceProvider();
+    if (bnbMethodSub) {
+      bnbMethodSub.textContent = provider
+        ? 'Binance Wallet detected'
+        : 'Not detected — use QR instead';
+    }
+    if (bnbConnectInjected) bnbConnectInjected.classList.toggle('disabled', !provider);
+
+    if (bnbQr && !bnbQr.dataset.loaded) {
+      const url = window.location.href.split('#')[0];
+      bnbQr.innerHTML = `<img alt="QR" src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=6&color=0F1F3A&bgcolor=FFFFFF&data=${encodeURIComponent(url)}">`;
+      bnbQr.dataset.loaded = '1';
+    }
+    binanceModal.classList.add('open');
+  }
+  function closeBinanceModal() { if (binanceModal) binanceModal.classList.remove('open'); }
+
+  if (btnBinance) btnBinance.addEventListener('click', () => {
+    const stored = (() => { try { return localStorage.getItem('hermex_wallet'); } catch { return null; } })();
+    if (stored && btnBinance.classList.contains('connected')) {
+      openBinanceModal();
+    } else {
+      openBinanceModal();
+    }
+  });
+  if (binanceModalClose) binanceModalClose.addEventListener('click', closeBinanceModal);
+  if (binanceModal) binanceModal.addEventListener('click', (e) => { if (e.target === binanceModal) closeBinanceModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeBinanceModal(); });
+
+  if (bnbConnectInjected) bnbConnectInjected.addEventListener('click', (e) => {
+    if (bnbConnectInjected.classList.contains('disabled')) {
+      showToast('Binance Wallet not detected in this browser');
+      return;
+    }
+    connectViaInjected();
+  });
+  if (bnbDisconnect) bnbDisconnect.addEventListener('click', () => {
+    setDisconnectedUI();
+    showToast('Wallet disconnected');
+  });
+  if (bnbCopy) bnbCopy.addEventListener('click', async () => {
+    const addr = bnbAddrEl ? bnbAddrEl.textContent : '';
+    try { await navigator.clipboard.writeText(addr); showToast('Address copied'); }
+    catch { showToast('Copy failed'); }
+  });
+
+  // Auto-reconnect if previously connected and provider is available
+  (async () => {
+    const provider = getBinanceProvider();
+    if (!provider) return;
+    try {
+      const accounts = await provider.request({ method: 'eth_accounts' });
+      if (accounts && accounts.length) {
+        let chainId = '0x1';
+        try { chainId = await provider.request({ method: 'eth_chainId' }); } catch {}
+        setConnectedUI(accounts[0], chainId);
+      }
+    } catch {}
+  })();
 
   // ──── Terminal cursor ────
   const terminalBody = document.getElementById('terminal');
