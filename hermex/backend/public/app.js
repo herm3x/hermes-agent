@@ -94,8 +94,33 @@
     }
   }
 
+  let apiEndpoints = [];
+
+  function methodClass(m) {
+    const x = (m || '').toUpperCase();
+    if (x === 'GET') return 'm-get';
+    if (x === 'POST') return 'm-post';
+    if (x === 'PUT') return 'm-put';
+    if (x === 'DELETE') return 'm-del';
+    return 'm-other';
+  }
+
   function renderLogs() {
     const body = document.getElementById('logsBody');
+
+    if (logFilter === 'api') {
+      if (!apiEndpoints.length) {
+        body.innerHTML = '<div class="log-line dim"><span class="log-msg">loading endpoints...</span></div>';
+        return;
+      }
+      body.innerHTML = apiEndpoints.map(ep => {
+        const mc = methodClass(ep.method);
+        return `<div class="log-line api-line"><span class="log-method ${mc}">${esc(ep.method)}</span> <span class="log-path">${esc(ep.path)}</span></div>`;
+      }).join('');
+      body.scrollTop = 0;
+      return;
+    }
+
     let filtered = allLogs;
     if (logFilter === 'errors') filtered = allLogs.filter(l => l.level === 'error' || l.level === 'warn');
     else if (logFilter === 'llm') filtered = allLogs.filter(l => l.source === 'hermes_llm');
@@ -114,10 +139,13 @@
     tab.addEventListener('click', e => {
       document.querySelectorAll('.log-tabs .tab').forEach(t => t.classList.remove('active'));
       e.target.classList.add('active');
-      const text = e.target.textContent;
+      const text = e.target.textContent.trim();
       if (text === 'ERRORS') logFilter = 'errors';
       else if (text === 'LLM') logFilter = 'llm';
+      else if (text === 'API') logFilter = 'api';
       else logFilter = 'all';
+      const logCountEl = document.getElementById('logCount');
+      if (logCountEl && logFilter === 'api') logCountEl.textContent = apiEndpoints.length;
       renderLogs();
     });
   });
@@ -236,16 +264,13 @@
   fetchTools();
   setInterval(fetchTools, 30000);
 
-  // ──── API Endpoints (dynamic) ────
+  // ──── API Endpoints (merged into Logs panel) ────
   async function fetchEndpoints() {
     try {
       const res = await fetch(`${API}/endpoints`);
       const d = await res.json();
-      const el = document.getElementById('apiEndpoints');
-      if (!el) return;
-      el.innerHTML = d.endpoints.map(ep =>
-        `<div class="info-item"><span class="fc-key">${esc(ep.method)}</span> ${esc(ep.path)}</div>`
-      ).join('');
+      apiEndpoints = d.endpoints || [];
+      if (logFilter === 'api') renderLogs();
     } catch (e) { console.error('Endpoints fetch failed:', e); }
   }
   fetchEndpoints();
