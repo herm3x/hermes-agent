@@ -3558,3 +3558,29 @@ body.docs-body { overflow-y: auto; }
   font-size: 8px;
   padding: 1px 5px;
 }
+
+/* ============================================================
+   2026-04-16 FIX: profile card content clipped by overflow:hidden
+   The profile-panel now contains avatar + stats + services.
+   It must NOT be flex-shrunk or overflow-clipped.
+   The sidebar itself scrolls if content exceeds viewport.
+   ============================================================ */
+.profile-panel {
+  overflow: visible !important;
+  flex-shrink: 0 !important;
+}
+
+/* Ensure sidebar-left allows scrolling for all its children */
+.sidebar-left {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+/* All other panels in sidebar can shrink, but profile stays full */
+.sidebar-left > .panel {
+  flex-shrink: 1;
+}
+.sidebar-left > .panel.profile-panel {
+  flex-shrink: 0 !important;
+  overflow: visible !important;
+}
