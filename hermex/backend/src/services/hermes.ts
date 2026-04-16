@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { config, getLLMBaseUrl, getLLMApiKey } from '../config.js';
+import { config, getLLMBaseUrl, getLLMApiKey, isLLMEnabled } from '../config.js';
 import type { TweetInput, MarketProposal } from '../types/index.js';
 import { addLog } from './logger.js';
 import { trackLLMUsage } from './token-tracker.js';
@@ -63,12 +63,23 @@ function getClient(): OpenAI {
 }
 
 export async function generateProposal(tweet: TweetInput): Promise<MarketProposal> {
+  if (!isLLMEnabled()) {
+    throw new Error('LLM disabled: no provider configured (set OPENAI_API_KEY or OPENROUTER_API_KEY)');
+  }
+
   const client = getClient();
   const userMessage = buildPrompt(tweet);
 
   try {
-    addLog('hermes_llm', `Generating proposal for @${tweet.author_handle}: "${tweet.text.substring(0, 60)}..."`);
+    addLog(
+      'hermes_llm',
+      `[${config.llm.provider}/${config.llm.model}] @${tweet.author_handle}: "${tweet.text.substring(0, 60)}..."`,
+    );
     const t0 = Date.now();
+
+    // OpenAI and OpenAI-compatible providers support response_format for strict JSON.
+    // Anthropic's /v1 doesn't — skip there.
+    const supportsJsonMode = config.llm.provider === 'openai' || config.llm.provider === 'openrouter';
 
     const completion = await client.chat.completions.create({
       model: config.llm.model,
@@ -78,6 +89,7 @@ export async function generateProposal(tweet: TweetInput): Promise<MarketProposa
       ],
       temperature: 0.7,
       max_tokens: 500,
+      ...(supportsJsonMode ? { response_format: { type: 'json_object' as const } } : {}),
     });
 
     const elapsed = ((Date.now() - t0) / 1000).toFixed(1);

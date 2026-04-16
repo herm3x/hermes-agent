@@ -33,7 +33,7 @@ app.listen(config.port, () => {
   ────────────────────────────────
   Port:     ${config.port}
   Env:      ${config.nodeEnv}
-  LLM:      ${config.llm.model}
+  LLM:      ${config.llm.provider}/${config.llm.model}
   Predict:  ${config.predictFun.apiUrl}
   ────────────────────────────────
   Ready at  http://localhost:${config.port}
