@@ -1,170 +1,5 @@
 <p align="center">
-  <img src="assets/banner.png" alt="Hermes Agent" width="100%">
-</p>
-
-# Hermes Agent ☤
-
-<p align="center">
-  <a href="https://hermes-agent.nousresearch.com/docs/"><img src="https://img.shields.io/badge/Docs-hermes--agent.nousresearch.com-FFD700?style=for-the-badge" alt="Documentation"></a>
-  <a href="https://discord.gg/NousResearch"><img src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"></a>
-  <a href="https://github.com/NousResearch/hermes-agent/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT"></a>
-  <a href="https://nousresearch.com"><img src="https://img.shields.io/badge/Built%20by-Nous%20Research-blueviolet?style=for-the-badge" alt="Built by Nous Research"></a>
-</p>
-
-**The self-improving AI agent built by [Nous Research](https://nousresearch.com).** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions. Run it on a $5 VPS, a GPU cluster, or serverless infrastructure that costs nearly nothing when idle. It's not tied to your laptop — talk to it from Telegram while it works on a cloud VM.
-
-Use any model you want — [Nous Portal](https://portal.nousresearch.com), [OpenRouter](https://openrouter.ai) (200+ models), [Xiaomi MiMo](https://platform.xiaomimimo.com), [z.ai/GLM](https://z.ai), [Kimi/Moonshot](https://platform.moonshot.ai), [MiniMax](https://www.minimax.io), [Hugging Face](https://huggingface.co), OpenAI, or your own endpoint. Switch with `hermes model` — no code changes, no lock-in.
-
-<table>
-<tr><td><b>A real terminal interface</b></td><td>Full TUI with multiline editing, slash-command autocomplete, conversation history, interrupt-and-redirect, and streaming tool output.</td></tr>
-<tr><td><b>Lives where you do</b></td><td>Telegram, Discord, Slack, WhatsApp, Signal, and CLI — all from a single gateway process. Voice memo transcription, cross-platform conversation continuity.</td></tr>
-<tr><td><b>A closed learning loop</b></td><td>Agent-curated memory with periodic nudges. Autonomous skill creation after complex tasks. Skills self-improve during use. FTS5 session search with LLM summarization for cross-session recall. <a href="https://github.com/plastic-labs/honcho">Honcho</a> dialectic user modeling. Compatible with the <a href="https://agentskills.io">agentskills.io</a> open standard.</td></tr>
-<tr><td><b>Scheduled automations</b></td><td>Built-in cron scheduler with delivery to any platform. Daily reports, nightly backups, weekly audits — all in natural language, running unattended.</td></tr>
-<tr><td><b>Delegates and parallelizes</b></td><td>Spawn isolated subagents for parallel workstreams. Write Python scripts that call tools via RPC, collapsing multi-step pipelines into zero-context-cost turns.</td></tr>
-<tr><td><b>Runs anywhere, not just your laptop</b></td><td>Six terminal backends — local, Docker, SSH, Daytona, Singularity, and Modal. Daytona and Modal offer serverless persistence — your agent's environment hibernates when idle and wakes on demand, costing nearly nothing between sessions. Run it on a $5 VPS or a GPU cluster.</td></tr>
-<tr><td><b>Research-ready</b></td><td>Batch trajectory generation, Atropos RL environments, trajectory compression for training the next generation of tool-calling models.</td></tr>
-</table>
-
----
-
-## Quick Install
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
-```
-
-Works on Linux, macOS, WSL2, and Android via Termux. The installer handles the platform-specific setup for you.
-
-> **Android / Termux:** The tested manual path is documented in the [Termux guide](https://hermes-agent.nousresearch.com/docs/getting-started/termux). On Termux, Hermes installs a curated `.[termux]` extra because the full `.[all]` extra currently pulls Android-incompatible voice dependencies.
->
-> **Windows:** Native Windows is not supported. Please install [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) and run the command above.
-
-After installation:
-
-```bash
-source ~/.bashrc    # reload shell (or: source ~/.zshrc)
-hermes              # start chatting!
-```
-
----
-
-## Getting Started
-
-```bash
-hermes              # Interactive CLI — start a conversation
-hermes model        # Choose your LLM provider and model
-hermes tools        # Configure which tools are enabled
-hermes config set   # Set individual config values
-hermes gateway      # Start the messaging gateway (Telegram, Discord, etc.)
-hermes setup        # Run the full setup wizard (configures everything at once)
-hermes claw migrate # Migrate from OpenClaw (if coming from OpenClaw)
-hermes update       # Update to the latest version
-hermes doctor       # Diagnose any issues
-```
-
-📖 **[Full documentation →](https://hermes-agent.nousresearch.com/docs/)**
-
-## CLI vs Messaging Quick Reference
-
-Hermes has two entry points: start the terminal UI with `hermes`, or run the gateway and talk to it from Telegram, Discord, Slack, WhatsApp, Signal, or Email. Once you're in a conversation, many slash commands are shared across both interfaces.
-
-| Action | CLI | Messaging platforms |
-|---------|-----|---------------------|
-| Start chatting | `hermes` | Run `hermes gateway setup` + `hermes gateway start`, then send the bot a message |
-| Start fresh conversation | `/new` or `/reset` | `/new` or `/reset` |
-| Change model | `/model [provider:model]` | `/model [provider:model]` |
-| Set a personality | `/personality [name]` | `/personality [name]` |
-| Retry or undo the last turn | `/retry`, `/undo` | `/retry`, `/undo` |
-| Compress context / check usage | `/compress`, `/usage`, `/insights [--days N]` | `/compress`, `/usage`, `/insights [days]` |
-| Browse skills | `/skills` or `/<skill-name>` | `/skills` or `/<skill-name>` |
-| Interrupt current work | `Ctrl+C` or send a new message | `/stop` or send a new message |
-| Platform-specific status | `/platforms` | `/status`, `/sethome` |
-
-For the full command lists, see the [CLI guide](https://hermes-agent.nousresearch.com/docs/user-guide/cli) and the [Messaging Gateway guide](https://hermes-agent.nousresearch.com/docs/user-guide/messaging).
-
----
-
-## Documentation
-
-All documentation lives at **[hermes-agent.nousresearch.com/docs](https://hermes-agent.nousresearch.com/docs/)**:
-
-| Section | What's Covered |
-|---------|---------------|
-| [Quickstart](https://hermes-agent.nousresearch.com/docs/getting-started/quickstart) | Install → setup → first conversation in 2 minutes |
-| [CLI Usage](https://hermes-agent.nousresearch.com/docs/user-guide/cli) | Commands, keybindings, personalities, sessions |
-| [Configuration](https://hermes-agent.nousresearch.com/docs/user-guide/configuration) | Config file, providers, models, all options |
-| [Messaging Gateway](https://hermes-agent.nousresearch.com/docs/user-guide/messaging) | Telegram, Discord, Slack, WhatsApp, Signal, Home Assistant |
-| [Security](https://hermes-agent.nousresearch.com/docs/user-guide/security) | Command approval, DM pairing, container isolation |
-| [Tools & Toolsets](https://hermes-agent.nousresearch.com/docs/user-guide/features/tools) | 40+ tools, toolset system, terminal backends |
-| [Skills System](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills) | Procedural memory, Skills Hub, creating skills |
-| [Memory](https://hermes-agent.nousresearch.com/docs/user-guide/features/memory) | Persistent memory, user profiles, best practices |
-| [MCP Integration](https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp) | Connect any MCP server for extended capabilities |
-| [Cron Scheduling](https://hermes-agent.nousresearch.com/docs/user-guide/features/cron) | Scheduled tasks with platform delivery |
-| [Context Files](https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files) | Project context that shapes every conversation |
-| [Architecture](https://hermes-agent.nousresearch.com/docs/developer-guide/architecture) | Project structure, agent loop, key classes |
-| [Contributing](https://hermes-agent.nousresearch.com/docs/developer-guide/contributing) | Development setup, PR process, code style |
-| [CLI Reference](https://hermes-agent.nousresearch.com/docs/reference/cli-commands) | All commands and flags |
-| [Environment Variables](https://hermes-agent.nousresearch.com/docs/reference/environment-variables) | Complete env var reference |
-
----
-
-## Migrating from OpenClaw
-
-If you're coming from OpenClaw, Hermes can automatically import your settings, memories, skills, and API keys.
-
-**During first-time setup:** The setup wizard (`hermes setup`) automatically detects `~/.openclaw` and offers to migrate before configuration begins.
-
-**Anytime after install:**
-
-```bash
-hermes claw migrate              # Interactive migration (full preset)
-hermes claw migrate --dry-run    # Preview what would be migrated
-hermes claw migrate --preset user-data   # Migrate without secrets
-hermes claw migrate --overwrite  # Overwrite existing conflicts
-```
-
-What gets imported:
-- **SOUL.md** — persona file
-- **Memories** — MEMORY.md and USER.md entries
-- **Skills** — user-created skills → `~/.hermes/skills/openclaw-imports/`
-- **Command allowlist** — approval patterns
-- **Messaging settings** — platform configs, allowed users, working directory
-- **API keys** — allowlisted secrets (Telegram, OpenRouter, OpenAI, Anthropic, ElevenLabs)
-- **TTS assets** — workspace audio files
-- **Workspace instructions** — AGENTS.md (with `--workspace-target`)
-
-See `hermes claw migrate --help` for all options, or use the `openclaw-migration` skill for an interactive agent-guided migration with dry-run previews.
-
----
-
-## Contributing
-
-We welcome contributions! See the [Contributing Guide](https://hermes-agent.nousresearch.com/docs/developer-guide/contributing) for development setup, code style, and PR process.
-
-Quick start for contributors:
-
-```bash
-git clone https://github.com/NousResearch/hermes-agent.git
-cd hermes-agent
-curl -LsSf https://astral.sh/uv/install.sh | sh
-uv venv venv --python 3.11
-source venv/bin/activate
-uv pip install -e ".[all,dev]"
-python -m pytest tests/ -q
-```
-
-> **RL Training (optional):** To work on the RL/Tinker-Atropos integration:
-> ```bash
-> git submodule update --init tinker-atropos
-> uv pip install -e "./tinker-atropos"
-> ```
-
----
-
-## ☤ Hermex — Prediction Markets on X
-
-<p align="center">
-  <img src="hermex/assets/hermex-eye.png" alt="Hermex" width="80" style="border-radius: 16px;">
+  <img src="hermex/assets/hermex-eye.png" alt="Hermex" width="140" style="border-radius: 24px;">
 </p>
 
 <pre align="center">
@@ -174,50 +9,230 @@ python -m pytest tests/ -q
 </pre>
 
 <p align="center">
-  <a href="https://x.com/herm3x"><img src="https://img.shields.io/badge/𝕏-@herm3x-000000?style=flat-square&logo=x&logoColor=white" alt="X"></a>
-  <a href="https://predict.fun"><img src="https://img.shields.io/badge/Predict.fun-Testnet-6366f1?style=flat-square" alt="Predict.fun"></a>
+  <b>Prediction Markets on X</b><br>
+  <sub>Turn every KOL tweet into a tradeable market — in under 3 seconds.</sub>
 </p>
 
-This fork includes **Hermex** — a Chrome Extension + backend that turns every KOL tweet into a real-time prediction market, powered by Hermes Agent.
+<p align="center">
+  <a href="https://x.com/herm3x"><img src="https://img.shields.io/badge/𝕏-@herm3x-000000?style=for-the-badge&logo=x&logoColor=white" alt="X @herm3x"></a>&nbsp;
+  <a href="https://predict.fun"><img src="https://img.shields.io/badge/Predict.fun-Trade_Now-6366f1?style=for-the-badge" alt="Predict.fun"></a>&nbsp;
+  <a href="https://github.com/herm3x/hermes-agent/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge" alt="MIT"></a>
+</p>
+
+---
+
+## What is Hermex?
+
+Hermex is a **Chrome Extension** that transforms your X (Twitter) feed into a live prediction market.
+
+When you browse X, Hermex automatically detects tweets from KOLs and celebrities, sends them to the **Hermes Agent** (LLM), and injects a **prediction market card** directly below the tweet — with Yes/No pricing, market volume, liquidity, and a one-click link to trade on **[Predict.fun](https://predict.fun)**.
+
+No extra tabs. No switching apps. Predictions appear inline, as if X had prediction markets built in.
+
+---
+
+## Preview
 
 <table>
 <tr>
-<td><img src="hermex/assets/hermex-feed-card.png" alt="Feed Card" width="500"></td>
-<td><img src="hermex/assets/hermex-popup.png" alt="Popup" width="350"></td>
-</tr>
-<tr>
-<td align="center"><b>Inline prediction card on X feed</b></td>
-<td align="center"><b>Extension popup settings</b></td>
+<td width="60%" align="center">
+  <img src="hermex/assets/hermex-feed-card.png" alt="Hermex Prediction Card" width="100%">
+  <br><b>Prediction card injected below a KOL tweet</b>
+</td>
+<td width="40%" align="center">
+  <img src="hermex/assets/hermex-popup.png" alt="Hermex Extension Popup" width="100%">
+  <br><b>Extension popup — settings & stats</b>
+</td>
 </tr>
 </table>
 
-- **Real-time detection** — MutationObserver watches your feed, zero polling
-- **Smart odds** — Hermes Agent generates context-aware probabilities in <3s
-- **Predict.fun** — Match existing markets or trade directly
-- **KOL-aware** — Volume/liquidity scaled to author influence
+---
 
-**Full docs + setup → [hermex/README.md](hermex/README.md)**
+## How It Works
 
-```bash
-cd hermex/backend && cp .env.example .env && bun install && bun run dev
-cd hermex/chrome-extension && bun install && bun run build
-# Load hermex/chrome-extension/dist as unpacked extension in Chrome
+```
+  ① Tweet detected        ② Hermes Agent          ③ Card appears
+  ┌──────────────┐  ───►  ┌──────────────┐  ───►  ┌──────────────┐
+  │  @elonmusk   │        │  Analyze     │        │  Yes   72¢   │
+  │  "Doge to    │        │  Generate    │        │  No    28¢   │
+  │   the moon   │        │  Price       │        │  $142K Vol   │
+  │   🚀"        │        │  Resolve     │        │  Trade ►     │
+  └──────────────┘        └──────────────┘        └──────────────┘
+      X Feed               Hermes 3 405B           Inline below
+   MutationObserver         < 3 seconds              the tweet
+```
+
+1. You browse X normally — Hermex runs silently in the background
+2. A `MutationObserver` detects KOL tweets in real-time (zero polling)
+3. The tweet is sent to **Hermes Agent**, which acts as a quantitative analyst
+4. The agent generates a market title, resolution criteria, and smart probabilities
+5. A **prediction card** with Yes/No pricing, volume, and liquidity appears below the tweet
+6. Click **"Trade on Predict.fun"** to place a real trade
+
+---
+
+## Key Features
+
+| | Feature | Description |
+|---|---------|-------------|
+| ⚡ | **< 3 second generation** | From tweet detection to card injection |
+| 🧠 | **Smart probabilities** | Hermes Agent reasons like a quant — not random, not lazy 50/50 |
+| 📊 | **Realistic market data** | Simulated volume, liquidity, traders, and spread based on KOL influence tier |
+| 🔗 | **Predict.fun integration** | Matches existing markets or links to create new ones |
+| 🛡️ | **Resilient extension** | Survives page navigation, account switches, and context invalidation |
+| 🎨 | **Native-looking UI** | Royal Blue glassmorphism design that feels like part of X |
+| 📡 | **Live dashboard** | System monitor with CPU, memory, request stats, token usage |
+| 🧪 | **Testnet-first** | Safe testing on Predict.fun testnet before mainnet |
+
+---
+
+## Architecture
+
+```
+┌──────────────────────────────────────────────────────┐
+│  Chrome Extension (Manifest V3)                      │
+│  ├── Content Script — DOM observer + card injection  │
+│  ├── Background SW — API relay + config management   │
+│  └── Popup — Settings, KOL whitelist, stats          │
+└───────────────┬──────────────────────────────────────┘
+                │ REST API
+┌───────────────▼──────────────────────────────────────┐
+│  Hermex Backend (Express + TypeScript + Bun)         │
+│  ├── POST /api/proposal  — LLM market generation    │
+│  ├── GET  /api/markets   — Predict.fun lookup        │
+│  ├── GET  /api/system    — Live system monitor       │
+│  └── GET  /api/health    — Health check              │
+└───────┬──────────────────────┬───────────────────────┘
+        │                      │
+┌───────▼────────┐    ┌────────▼────────┐
+│  Hermes Agent  │    │  Predict.fun    │
+│  Hermes 3 405B │    │  REST API       │
+│  via OpenRouter│    │  Testnet / Main │
+└────────────────┘    └─────────────────┘
 ```
 
 ---
 
-## Community
+## Quick Start
 
-- 💬 [Discord](https://discord.gg/NousResearch)
-- 📚 [Skills Hub](https://agentskills.io)
-- 🐛 [Issues](https://github.com/NousResearch/hermes-agent/issues)
-- 💡 [Discussions](https://github.com/NousResearch/hermes-agent/discussions)
-- 🔌 [HermesClaw](https://github.com/AaronWong1999/hermesclaw) — Community WeChat bridge: Run Hermes Agent and OpenClaw on the same WeChat account.
+### Prerequisites
+
+- [Bun](https://bun.sh) v1.0+
+- Chrome or Chromium
+- [OpenRouter API key](https://openrouter.ai)
+
+### 1. Clone
+
+```bash
+git clone https://github.com/herm3x/hermes-agent.git
+cd hermes-agent/hermex
+```
+
+### 2. Start the Backend
+
+```bash
+cd backend
+cp .env.example .env
+# Edit .env — add your OPENROUTER_API_KEY
+bun install
+bun run dev
+# ☤ Hermex Backend running at http://localhost:6088
+```
+
+### 3. Build the Chrome Extension
+
+```bash
+cd chrome-extension
+bun install
+bun run build
+```
+
+### 4. Load the Extension
+
+1. Open `chrome://extensions`
+2. Toggle **Developer mode** (top right)
+3. Click **Load unpacked** → select `hermex/chrome-extension/dist`
+4. Pin the ☤ icon in your toolbar
+5. Open X.com — prediction cards will appear automatically
+
+### 5. Configure (Optional)
+
+Click the Hermex icon in the toolbar:
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| Backend API URL | `http://localhost:6088` | Your backend endpoint |
+| Testnet Mode | On | Use Predict.fun testnet |
+| Auto-propose | On | Automatically generate for detected KOL tweets |
+| Min Followers | 50,000 | Minimum follower count to trigger |
+| KOL Whitelist | — | Custom handles to always track |
 
 ---
 
-## License
+## Deploy to VPS
 
-MIT — see [LICENSE](LICENSE).
+```bash
+git clone https://github.com/herm3x/hermes-agent.git
+cd hermes-agent/hermex
 
-Built by [Nous Research](https://nousresearch.com).
+# Configure
+cd backend && cp .env.example .env
+# Edit .env — add OPENROUTER_API_KEY
+
+# Docker
+cd ..
+docker compose up -d
+
+# Verify
+curl http://your-server:6088/api/health
+```
+
+Then update the **Backend API URL** in the extension popup to your server's public address.
+
+---
+
+## Tracked KOLs
+
+Default watchlist includes 40+ accounts:
+
+`@elonmusk` `@VitalikButerin` `@cz_binance` `@realDonaldTrump` `@sama` `@NousResearch` `@OpenAI` `@AnthropicAI` `@GoogleDeepMind` `@APompliano` `@CathieDWood` `@saylor` `@naval` `@pmarca` `@brian_armstrong` ...
+
+Add any handle via the **KOL Whitelist** in the extension popup.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Extension | TypeScript · Webpack · Chrome Manifest V3 |
+| Backend | Bun · Express · TypeScript |
+| LLM | Hermes 3 405B via OpenRouter |
+| Markets | Predict.fun REST API (Testnet + Mainnet) |
+| Deployment | Docker · docker-compose |
+| UI Design | Royal Blue glassmorphism · JetBrains Mono |
+
+---
+
+## Roadmap
+
+- [x] Chrome Extension — real-time KOL tweet detection
+- [x] Hermes Agent — smart probability generation
+- [x] Predict.fun testnet integration
+- [x] Live dashboard with system monitoring
+- [x] Docker deployment
+- [ ] Predict.fun deep linking (jump to specific market)
+- [ ] Hot Tweet Markets sidebar (Top 5 live proposals)
+- [ ] Hermes self-learning loop (improve from market outcomes)
+- [ ] Predict.fun mainnet support
+- [ ] Telegram / Discord push notifications
+- [ ] KOL subscription feed
+
+---
+
+<p align="center">
+  <img src="hermex/assets/hermex-eye.png" alt="Hermex" width="48"><br><br>
+  <a href="https://x.com/herm3x"><b>𝕏 @herm3x</b></a><br>
+  <sub>Built with <a href="https://nousresearch.com">Hermes Agent</a> · <a href="https://predict.fun">Predict.fun</a></sub><br>
+  <sub>MIT License</sub>
+</p>
