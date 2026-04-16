@@ -3,14 +3,17 @@
  *
  * Pipeline:
  *   1. Fetch N recent tweets per tracked KOL (real — via X API / RSSHub / Nitter)
- *   2. Generate a market proposal per tweet using Hermes LLM
- *   3. Enrich with realistic volume/liquidity/traders based on KOL tier
- *   4. Cache result, refresh every REFRESH_MS in background
+ *   2. Generate a market proposal per tweet using the Hermes LLM
+ *   3. Try to match the proposal to a REAL on-chain Predict.fun market
+ *      (testnet). If matched, populate real volume/liquidity; otherwise
+ *      leave on-chain fields null and flag the proposal as "proposal".
+ *   4. Cache result, refresh every REFRESH_MS in background.
  */
 
 import { fetchRecentTweets, RawTweet } from './tweet-fetcher';
 import { generateProposal } from './hermes';
 import { addLog } from './logger';
+import { matchMarketIdForQuery, getMarketStats, getMarketOrderbook } from './predict-fun';
 import type { TweetInput } from '../types';
 
 export interface FeedMarket {
@@ -24,12 +27,16 @@ export interface FeedMarket {
   question: string;
   yesPrice: number;
   noPrice: number;
-  volume: number;
-  liquidity: number;
-  traders: number;
-  priceChange: number;
+  // On-chain stats — ONLY populated when this market matches a real
+  // Predict.fun testnet market. null = proposal-only (not yet minted).
+  predictFunMarketId: number | null;
+  volume: number | null;
+  liquidity: number | null;
+  traders: number | null;
+  priceChange: number | null;
   endDate: string;
   source: string;
+  status: 'proposal' | 'on-chain';
 }
 
 interface KOL {
@@ -62,27 +69,9 @@ const cache: Cache = {
   refreshing: false,
 };
 
-function tierStats(tier: 'S' | 'A' | 'B') {
-  if (tier === 'S') {
-    return {
-      volume: 250_000 + Math.floor(Math.random() * 400_000),
-      liquidity: 60_000 + Math.floor(Math.random() * 100_000),
-      traders: 600 + Math.floor(Math.random() * 1500),
-    };
-  }
-  if (tier === 'A') {
-    return {
-      volume: 30_000 + Math.floor(Math.random() * 120_000),
-      liquidity: 12_000 + Math.floor(Math.random() * 40_000),
-      traders: 150 + Math.floor(Math.random() * 400),
-    };
-  }
-  return {
-    volume: 5_000 + Math.floor(Math.random() * 20_000),
-    liquidity: 2_000 + Math.floor(Math.random() * 8_000),
-    traders: 30 + Math.floor(Math.random() * 100),
-  };
-}
+// NOTE: we deliberately do NOT synthesize volume/liquidity/traders.
+// Those fields are only populated when the tweet's proposal matches a
+// real on-chain Predict.fun market (see services/predict-fun.ts enrichment).
 
 function relTime(iso: string): string {
   try {
@@ -231,7 +220,6 @@ async function tweetToMarket(kol: KOL, tw: RawTweet, source: string): Promise<Fe
     );
   }
 
-  const stats = tierStats(kol.tier);
   return {
     id: `${kol.handle}-${tw.id}`.slice(0, 80),
     author: kol.name,
@@ -243,12 +231,16 @@ async function tweetToMarket(kol: KOL, tw: RawTweet, source: string): Promise<Fe
     question,
     yesPrice: yp,
     noPrice: +(1 - yp).toFixed(2),
-    volume: stats.volume,
-    liquidity: stats.liquidity,
-    traders: stats.traders,
-    priceChange: +((Math.random() - 0.45) * 8).toFixed(2),
+    // All on-chain fields start null. A subsequent enrichment step matches
+    // this proposal to a real Predict.fun market and fills them in.
+    predictFunMarketId: null,
+    volume: null,
+    liquidity: null,
+    traders: null,
+    priceChange: null,
     endDate,
     source: `${source}/${generator}`,
+    status: 'proposal',
   };
 }
 
@@ -271,12 +263,35 @@ async function refreshFeed(): Promise<void> {
     }
 
     if (next.length) {
+      // Enrich with real Predict.fun on-chain data (best-effort, in parallel).
+      await Promise.all(
+        next.map(async (m) => {
+          try {
+            const id = await matchMarketIdForQuery(m.question);
+            if (!id) return;
+            const [stats, ob] = await Promise.all([getMarketStats(id), getMarketOrderbook(id)]);
+            m.predictFunMarketId = id;
+            if (stats) {
+              m.volume = Math.round(stats.volumeTotalUsd);
+              m.liquidity = Math.round(stats.totalLiquidityUsd);
+            }
+            if (ob?.lastPrice != null) {
+              const lastYes = ob.lastOutcome?.toLowerCase() === 'yes' ? ob.lastPrice : 1 - ob.lastPrice;
+              m.yesPrice = +lastYes.toFixed(2);
+              m.noPrice = +(1 - lastYes).toFixed(2);
+            }
+            m.status = 'on-chain';
+          } catch { /* leave as proposal */ }
+        }),
+      );
+
+      const onChainCount = next.filter((m) => m.status === 'on-chain').length;
       cache.markets = next;
       cache.updatedAt = Date.now();
       cache.sources = sources;
       addLog(
         'feed_gen',
-        `refreshed ${next.length} markets (sources: ${Object.entries(sources)
+        `refreshed ${next.length} markets — ${onChainCount} matched on-chain (sources: ${Object.entries(sources)
           .map(([k, v]) => `${k}=${v}`)
           .join(', ')})`,
       );

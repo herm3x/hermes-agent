@@ -180,11 +180,11 @@
 
     <!-- CENTER -->
     <main class="center-area">
-      <!-- Live Prediction Markets -->
+      <!-- Live Prediction Markets (tweet-derived proposals) -->
       <div class="panel markets-panel">
         <div class="panel-header">
           <span><span class="ph-icon">✦</span> LIVE MARKETS
-            <span class="markets-sub">from tracked KOLs · on-chain betting via Binance Wallet</span>
+            <span class="markets-sub">from tracked KOLs · on-chain when a Predict.fun match exists</span>
           </span>
           <span class="header-badges">
             <span class="badge green">● LIVE</span>
@@ -203,6 +203,31 @@
           <div class="markets-fade right"></div>
         </div>
         <div class="markets-dots" id="marketsDots"></div>
+      </div>
+
+      <!-- Real on-chain markets from Predict.fun BNB testnet -->
+      <div class="panel markets-panel onchain-panel">
+        <div class="panel-header">
+          <span><span class="ph-icon">⛓</span> ON-CHAIN MARKETS
+            <span class="markets-sub">live from predict.fun (BNB testnet) · real volume, real orderbook</span>
+          </span>
+          <span class="header-badges">
+            <span class="badge green">● ON-CHAIN</span>
+            <span class="badge" id="onchainCount">0</span>
+            <button class="slider-nav" id="onchainPrev" aria-label="Previous" disabled>‹</button>
+            <button class="slider-nav" id="onchainNext" aria-label="Next">›</button>
+          </span>
+        </div>
+        <div class="markets-viewport">
+          <div class="markets-row" id="onchainRow">
+            <div class="market-skeleton"><div class="sk-shimmer"></div></div>
+            <div class="market-skeleton"><div class="sk-shimmer"></div></div>
+            <div class="market-skeleton"><div class="sk-shimmer"></div></div>
+          </div>
+          <div class="markets-fade left"></div>
+          <div class="markets-fade right"></div>
+        </div>
+        <div class="markets-dots" id="onchainDots"></div>
       </div>
 
       <!-- Bet Modal -->

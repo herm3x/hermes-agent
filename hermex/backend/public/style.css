@@ -2150,6 +2150,22 @@ body::before {
 }
 .mk-change.up { color: #22c55e; background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.25); }
 .mk-change.down { color: #ef4444; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.25); }
+.mk-change.pending {
+  color: rgba(148, 163, 184, 0.85);
+  background: rgba(100, 116, 139, 0.10);
+  border: 1px solid rgba(100, 116, 139, 0.22);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.market-card.on-chain { border-color: rgba(34, 197, 94, 0.28); }
+.market-card.on-chain::before {
+  background: linear-gradient(180deg, rgba(34, 197, 94, 0.12), transparent 40%);
+}
+.market-card.proposal { border-color: rgba(100, 116, 139, 0.22); }
+.mkf-pending {
+  color: rgba(148, 163, 184, 0.7);
+  font-style: italic;
+}
 
 .mk-tweet {
   font-size: 11px;

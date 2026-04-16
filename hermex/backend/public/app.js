@@ -320,55 +320,62 @@
   }
 
   // ──── Live Feed Markets ────
-  const marketsRow = document.getElementById('marketsRow');
-  const marketsCountEl = document.getElementById('marketsCount');
-  const marketsPrev = document.getElementById('marketsPrev');
-  const marketsNext = document.getElementById('marketsNext');
-  const marketsDots = document.getElementById('marketsDots');
-  const marketsViewport = marketsRow ? marketsRow.parentElement : null;
+  function makeSlider(rowId, prevId, nextId, dotsId) {
+    const row = document.getElementById(rowId);
+    const prev = document.getElementById(prevId);
+    const next = document.getElementById(nextId);
+    const dots = document.getElementById(dotsId);
+    const viewport = row ? row.parentElement : null;
+    const CARD_W = 340 + 14;
 
-  function updateSliderState() {
-    if (!marketsRow || !marketsViewport) return;
-    const maxScroll = marketsRow.scrollWidth - marketsRow.clientWidth;
-    const cur = marketsRow.scrollLeft;
-    const hasPrev = cur > 4;
-    const hasNext = cur < maxScroll - 4;
-    marketsViewport.classList.toggle('has-prev', hasPrev);
-    marketsViewport.classList.toggle('has-next', hasNext);
-    if (marketsPrev) marketsPrev.disabled = !hasPrev;
-    if (marketsNext) marketsNext.disabled = !hasNext;
-    if (marketsDots && currentMarkets.length) {
-      const cardWidth = 340 + 14;
-      const idx = Math.round(cur / cardWidth);
-      marketsDots.querySelectorAll('.markets-dot').forEach((d, i) => {
-        d.classList.toggle('active', i === idx);
+    function update() {
+      if (!row || !viewport) return;
+      const maxScroll = row.scrollWidth - row.clientWidth;
+      const cur = row.scrollLeft;
+      const hasPrev = cur > 4;
+      const hasNext = cur < maxScroll - 4;
+      viewport.classList.toggle('has-prev', hasPrev);
+      viewport.classList.toggle('has-next', hasNext);
+      if (prev) prev.disabled = !hasPrev;
+      if (next) next.disabled = !hasNext;
+      if (dots) {
+        const idx = Math.round(cur / CARD_W);
+        dots.querySelectorAll('.markets-dot').forEach((d, i) => {
+          d.classList.toggle('active', i === idx);
+        });
+      }
+    }
+    function render(count) {
+      if (!dots) return;
+      dots.innerHTML = Array.from({ length: count }).map((_, i) =>
+        `<button class="markets-dot${i === 0 ? ' active' : ''}" data-idx="${i}"></button>`
+      ).join('');
+      dots.querySelectorAll('.markets-dot').forEach(dot => {
+        dot.addEventListener('click', () => {
+          const idx = parseInt(dot.dataset.idx, 10);
+          row.scrollTo({ left: idx * CARD_W, behavior: 'smooth' });
+        });
       });
     }
+    function slideBy(dir) {
+      if (!row) return;
+      row.scrollBy({ left: dir * CARD_W, behavior: 'smooth' });
+    }
+    if (prev) prev.addEventListener('click', () => slideBy(-1));
+    if (next) next.addEventListener('click', () => slideBy(1));
+    if (row) row.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    return { row, update, render };
   }
 
-  function renderDots(count) {
-    if (!marketsDots) return;
-    marketsDots.innerHTML = Array.from({ length: count }).map((_, i) =>
-      `<button class="markets-dot${i === 0 ? ' active' : ''}" data-idx="${i}" aria-label="Go to market ${i + 1}"></button>`
-    ).join('');
-    marketsDots.querySelectorAll('.markets-dot').forEach(dot => {
-      dot.addEventListener('click', () => {
-        const idx = parseInt(dot.dataset.idx, 10);
-        const cardWidth = 340 + 14;
-        marketsRow.scrollTo({ left: idx * cardWidth, behavior: 'smooth' });
-      });
-    });
-  }
-
-  function slideBy(dir) {
-    if (!marketsRow) return;
-    const cardWidth = 340 + 14;
-    marketsRow.scrollBy({ left: dir * cardWidth, behavior: 'smooth' });
-  }
-  if (marketsPrev) marketsPrev.addEventListener('click', () => slideBy(-1));
-  if (marketsNext) marketsNext.addEventListener('click', () => slideBy(1));
-  if (marketsRow) marketsRow.addEventListener('scroll', updateSliderState, { passive: true });
-  window.addEventListener('resize', updateSliderState);
+  const feedSlider = makeSlider('marketsRow', 'marketsPrev', 'marketsNext', 'marketsDots');
+  const onchainSlider = makeSlider('onchainRow', 'onchainPrev', 'onchainNext', 'onchainDots');
+  const marketsRow = feedSlider.row;
+  const marketsCountEl = document.getElementById('marketsCount');
+  const onchainRow = onchainSlider.row;
+  const onchainCountEl = document.getElementById('onchainCount');
+  function updateSliderState() { feedSlider.update(); }
+  function renderDots(n) { feedSlider.render(n); }
 
   function fmtUSD(n) {
     if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(1) + 'M';
@@ -402,18 +409,38 @@
     marketsRow.innerHTML = markets.map(m => {
       const yesPct = Math.round(m.yesPrice * 100);
       const noPct = 100 - yesPct;
-      const chg = m.priceChange || 0;
-      const chgCls = chg >= 0 ? 'up' : 'down';
-      const chgArrow = chg >= 0 ? '▲' : '▼';
+      const onChain = m.status === 'on-chain' && m.predictFunMarketId;
+      const hasVolume = typeof m.volume === 'number';
+      const hasLiq = typeof m.liquidity === 'number';
+      const hasChg = typeof m.priceChange === 'number';
+      const hasTraders = typeof m.traders === 'number';
+
+      const headerMeta = hasVolume
+        ? `<span class="mk-live-dot"></span>${esc(m.timestamp)} · ${fmtUSD(m.volume)} vol`
+        : `<span class="mk-live-dot"></span>${esc(m.timestamp)} · proposal`;
+
+      const changePill = hasChg
+        ? `<div class="mk-change ${m.priceChange >= 0 ? 'up' : 'down'}">${m.priceChange >= 0 ? '▲' : '▼'} ${Math.abs(m.priceChange).toFixed(1)}%</div>`
+        : `<div class="mk-change pending" title="Not yet minted on Predict.fun">${onChain ? 'on-chain' : 'proposal'}</div>`;
+
+      const footerParts = [];
+      if (hasTraders) footerParts.push(`<span><span class="mkf-dot"></span>${fmtNum(m.traders)} traders</span>`);
+      if (hasLiq) footerParts.push(`<span>Liq ${fmtUSD(m.liquidity)}</span>`);
+      if (!hasLiq && !hasTraders) footerParts.push(`<span class="mkf-pending">Awaiting on-chain match…</span>`);
+      footerParts.push(`<span>Ends ${esc(m.endDate)}</span>`);
+
+      const btnBuyLabel = onChain ? 'BUY YES' : 'BET YES';
+      const btnBuyLabelNo = onChain ? 'BUY NO' : 'BET NO';
+
       return `
-        <div class="market-card" data-id="${esc(m.id)}">
+        <div class="market-card ${onChain ? 'on-chain' : 'proposal'}" data-id="${esc(m.id)}">
           <div class="mk-head">
             ${avatarHTML(m)}
             <div class="mk-author">
               <div class="mk-handle">@${esc(m.handle)}</div>
-              <div class="mk-meta"><span class="mk-live-dot"></span>${esc(m.timestamp)} · ${fmtUSD(m.volume)} vol</div>
+              <div class="mk-meta">${headerMeta}</div>
             </div>
-            <div class="mk-change ${chgCls}">${chgArrow} ${Math.abs(chg).toFixed(1)}%</div>
+            ${changePill}
           </div>
           <div class="mk-tweet" title="${esc(m.tweet)}">${esc(m.tweet)}</div>
           <div class="mk-question">${esc(m.question)}</div>
@@ -428,13 +455,11 @@
             </div>
           </div>
           <div class="mk-actions">
-            <button class="mk-btn yes" data-side="YES">BUY YES ${pctLabel(m.yesPrice)}</button>
-            <button class="mk-btn no" data-side="NO">BUY NO ${pctLabel(m.noPrice)}</button>
+            <button class="mk-btn yes" data-side="YES">${btnBuyLabel} ${pctLabel(m.yesPrice)}</button>
+            <button class="mk-btn no" data-side="NO">${btnBuyLabelNo} ${pctLabel(m.noPrice)}</button>
           </div>
           <div class="mk-footer">
-            <span><span class="mkf-dot"></span>${fmtNum(m.traders)} traders</span>
-            <span>Liq ${fmtUSD(m.liquidity)}</span>
-            <span>Ends ${esc(m.endDate)}</span>
+            ${footerParts.join('\n            ')}
           </div>
         </div>
       `;
@@ -467,7 +492,87 @@
     }
   }
   fetchFeedMarkets();
-  setInterval(fetchFeedMarkets, 8000);
+  // Backend refreshes every ~10min; poll at 30s so orderbook-derived prices
+  // and volumes stay fresh without hammering upstream APIs.
+  setInterval(fetchFeedMarkets, 30000);
+
+  // ──── Real on-chain markets (Predict.fun BNB testnet) ────
+  function renderOnchain(markets) {
+    if (!onchainRow) return;
+    if (onchainCountEl) onchainCountEl.textContent = markets.length;
+    if (!markets.length) {
+      onchainRow.innerHTML = '<div class="markets-empty">No open markets</div>';
+      return;
+    }
+    onchainRow.innerHTML = markets.map(m => {
+      const stats = m.stats || {};
+      const ob = m.orderbook || {};
+      const last = typeof ob.lastPrice === 'number' ? ob.lastPrice : 0.5;
+      const yesPct = Math.round(((ob.lastOutcome && ob.lastOutcome.toLowerCase() === 'no') ? 1 - last : last) * 100);
+      const noPct = 100 - yesPct;
+      const vol24 = Number(stats.volume24hUsd || 0);
+      const volTotal = Number(stats.volumeTotalUsd || 0);
+      const liq = Number(stats.totalLiquidityUsd || 0);
+      const imgSrc = m.imageUrl || '';
+      const question = esc(m.question || m.title || '');
+      const description = esc((m.description || '').slice(0, 120));
+      const cid = esc((m.conditionId || '').slice(0, 10) + '…');
+
+      return `
+        <div class="market-card on-chain" data-url="${esc(m.url)}">
+          <div class="mk-head">
+            <div class="mk-avatar-wrap">
+              ${imgSrc
+                ? `<img class="mk-avatar" src="${esc(imgSrc)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+                : ''}
+              <div class="mk-avatar-fallback" ${imgSrc ? 'style="display:none"' : ''}>${esc((m.question || '?').trim().charAt(0))}</div>
+            </div>
+            <div class="mk-author">
+              <div class="mk-handle">predict.fun #${m.id}</div>
+              <div class="mk-meta"><span class="mk-live-dot"></span>${fmtUSD(Math.round(volTotal))} total · ${fmtUSD(Math.round(vol24))} 24h</div>
+            </div>
+            <div class="mk-change up" title="Real on-chain conditionId">${cid}</div>
+          </div>
+          <div class="mk-tweet">${description || 'On-chain prediction market on Predict.fun BNB testnet.'}</div>
+          <div class="mk-question">${question}</div>
+          <div class="mk-bars">
+            <div class="mk-bar yes" style="--pct:${yesPct}%">
+              <span class="mk-bar-label">YES</span>
+              <span class="mk-bar-price">${yesPct}¢</span>
+            </div>
+            <div class="mk-bar no" style="--pct:${noPct}%">
+              <span class="mk-bar-label">NO</span>
+              <span class="mk-bar-price">${noPct}¢</span>
+            </div>
+          </div>
+          <div class="mk-actions">
+            <a class="mk-btn yes" href="${esc(m.url)}" target="_blank" rel="noopener">TRADE ON PREDICT.FUN →</a>
+          </div>
+          <div class="mk-footer">
+            <span><span class="mkf-dot"></span>Liq ${fmtUSD(Math.round(liq))}</span>
+            <span>${ob.lastSide ? `Last ${esc(ob.lastSide)} ${esc(ob.lastOutcome || '')} @ ${Math.round(last * 100)}¢` : 'No recent trades'}</span>
+            <span>BNB testnet</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+    onchainSlider.render(markets.length);
+    requestAnimationFrame(() => onchainSlider.update());
+  }
+
+  async function fetchOnchainMarkets() {
+    try {
+      const res = await fetch(`${API}/predict-markets?limit=12&t=${Date.now()}`, { cache: 'no-store' });
+      const d = await res.json();
+      renderOnchain(d.markets || []);
+    } catch (e) {
+      console.error('On-chain markets fetch failed:', e);
+      if (onchainRow) onchainRow.innerHTML = '<div class="markets-empty error">Failed to load on-chain markets</div>';
+    }
+  }
+  fetchOnchainMarkets();
+  // Server caches this for 60s; poll at 45s.
+  setInterval(fetchOnchainMarkets, 45000);
 
   // ──── Bet Modal ────
   const betModal = document.getElementById('betModal');
