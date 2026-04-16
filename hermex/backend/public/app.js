@@ -42,14 +42,6 @@
   generateAsciiBg();
   window.addEventListener('resize', generateAsciiBg);
 
-  // ──── Clock ────
-  function updateClock() {
-    const now = new Date();
-    document.getElementById('clock').textContent = now.toTimeString().substring(0, 8);
-  }
-  setInterval(updateClock, 1000);
-  updateClock();
-
   function setMood() {}
 
   // ──── System Monitor ────
@@ -623,7 +615,7 @@
   function setDisconnectedUI() {
     if (!btnBinanceLabel) return;
     btnBinance.classList.remove('connected');
-    btnBinanceLabel.textContent = 'CONNECT BINANCE';
+    btnBinanceLabel.innerHTML = '<span class="bnc-lbl-full">CONNECT BINANCE</span><span class="bnc-lbl-short">CONNECT</span>';
     if (connectedPane) connectedPane.style.display = 'none';
     if (disconnectedPane) disconnectedPane.style.display = '';
     try { localStorage.removeItem('hermex_wallet'); } catch {}
@@ -745,6 +737,128 @@
     div.textContent = String(str);
     return div.innerHTML;
   }
+
+  // ──── Recent Bets (simulated, minute-cadence inflow) ────
+  (function initRecentBets() {
+    const body = document.getElementById('betsBody');
+    const countEl = document.getElementById('betsCount');
+    if (!body) return;
+
+    const MARKETS = [
+      { handle: 'Teknium',    tag: 'Mutahar · Hermes showcase' },
+      { handle: 'Teknium',    tag: 'Hermes Agent · QQBot MAU' },
+      { handle: 'Teknium',    tag: 'Hermes dataset · 10k DLs' },
+      { handle: 'Teknium',    tag: 'Local models · Qwen vs Gemma' },
+      { handle: 'cz_binance', tag: 'GiggleAcademy · 500k students' },
+      { handle: 'cz_binance', tag: 'Binance Pakistan · onboarding' },
+    ];
+
+    const HEX = '0123456789abcdef';
+    function randAddr() {
+      let out = '0x';
+      for (let i = 0; i < 40; i++) out += HEX[Math.floor(Math.random() * 16)];
+      // checksum-ish: upper-case ~half the letters for a BNB/EVM address look
+      return '0x' + out.slice(2).split('').map(c =>
+        /[a-f]/.test(c) && Math.random() < 0.5 ? c.toUpperCase() : c
+      ).join('');
+    }
+    function shortAddr(a) {
+      return a.slice(0, 6) + '…' + a.slice(-4);
+    }
+    function randAmount() {
+      // Weighted: lots of small bets, some whales
+      const r = Math.random();
+      if (r < 0.55) return Math.round((20 + Math.random() * 280));        // $20–300
+      if (r < 0.85) return Math.round((300 + Math.random() * 1700));      // $300–2k
+      if (r < 0.97) return Math.round((2000 + Math.random() * 8000));     // $2k–10k
+      return Math.round((10000 + Math.random() * 40000));                 // $10k–50k whale
+    }
+    function fmtAmount(n) {
+      if (n >= 1000) return '$' + (n / 1000).toFixed(n >= 10000 ? 1 : 2) + 'K';
+      return '$' + n;
+    }
+    function ago(ts) {
+      const s = Math.max(1, Math.round((Date.now() - ts) / 1000));
+      if (s < 60) return s + 's ago';
+      const m = Math.floor(s / 60);
+      if (m < 60) return m + 'm ago';
+      const h = Math.floor(m / 60);
+      return h + 'h ago';
+    }
+
+    const MAX_ROWS = 18;
+    const bets = [];   // newest first
+
+    function newBet(atTs) {
+      const m = MARKETS[Math.floor(Math.random() * MARKETS.length)];
+      const side = Math.random() < 0.55 ? 'yes' : 'no';
+      return {
+        addr: randAddr(),
+        side,
+        amount: randAmount(),
+        market: m,
+        ts: atTs,
+        fresh: true,
+      };
+    }
+
+    function render() {
+      body.innerHTML = '';
+      bets.forEach((b) => {
+        const row = document.createElement('div');
+        row.className = 'bet-row bet-' + b.side + (b.fresh ? ' bet-new' : '');
+        row.innerHTML = `
+          <div class="bet-line1">
+            <span class="bet-addr">${shortAddr(b.addr)}</span>
+            <span class="bet-action">BET</span>
+            <span class="bet-side ${b.side}">${b.side.toUpperCase()}</span>
+          </div>
+          <span class="bet-amount">${fmtAmount(b.amount)}</span>
+          <div class="bet-line2">
+            <span class="bet-market"><span class="bm-at">@${esc(b.market.handle)}</span> · ${esc(b.market.tag)}</span>
+            <span class="bet-time" data-ts="${b.ts}">${ago(b.ts)}</span>
+          </div>`;
+        body.appendChild(row);
+        b.fresh = false;
+      });
+      countEl.textContent = bets.length;
+    }
+
+    function tickTimes() {
+      body.querySelectorAll('.bet-time').forEach(el => {
+        const ts = Number(el.getAttribute('data-ts'));
+        if (ts) el.textContent = ago(ts);
+      });
+    }
+
+    // Seed: 8 past bets spread over the last ~4 minutes
+    (function seed() {
+      const now = Date.now();
+      for (let i = 0; i < 8; i++) {
+        const b = newBet(now - Math.round((5 + i * 28 + Math.random() * 20) * 1000));
+        b.fresh = false;
+        bets.push(b);
+      }
+      bets.sort((a, b) => b.ts - a.ts);
+      render();
+    })();
+
+    // Every 12–22s push 1 new bet (so roughly 3–5 per minute across the 6 markets)
+    function schedule() {
+      const delay = 12000 + Math.random() * 10000;
+      setTimeout(() => {
+        const b = newBet(Date.now());
+        bets.unshift(b);
+        if (bets.length > MAX_ROWS) bets.length = MAX_ROWS;
+        render();
+        schedule();
+      }, delay);
+    }
+    schedule();
+
+    // Keep relative timestamps fresh
+    setInterval(tickTimes, 1000);
+  })();
 
   // ──── Init ────
   loadDirectory('.');
