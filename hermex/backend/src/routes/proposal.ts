@@ -162,6 +162,34 @@ router.get('/tokens', (_req: Request, res: Response) => {
   res.json(usage);
 });
 
+router.get('/tools', (_req: Request, res: Response) => {
+  const tools = [
+    { name: 'proposal_generator', status: typeof generateProposal === 'function' ? 'on' : 'off', type: 'backend' },
+    { name: 'market_search', status: typeof searchMarkets === 'function' ? 'on' : 'off', type: 'backend' },
+    { name: 'system_monitor', status: typeof getSystemStats === 'function' ? 'on' : 'off', type: 'backend' },
+    { name: 'log_collector', status: typeof addLog === 'function' ? 'on' : 'off', type: 'backend' },
+    { name: 'token_tracker', status: typeof trackRequest === 'function' ? 'on' : 'off', type: 'backend' },
+    { name: 'file_explorer', status: typeof getDirectoryListing === 'function' ? 'on' : 'off', type: 'backend' },
+    { name: 'kol_detector', status: 'ext', type: 'extension' },
+    { name: 'card_injector', status: 'ext', type: 'extension' },
+  ];
+  res.json({ tools });
+});
+
+router.get('/endpoints', (_req: Request, res: Response) => {
+  const endpoints: Array<{ method: string; path: string }> = [];
+  const stack = (router as any).stack;
+  for (const layer of stack) {
+    if (layer.route) {
+      const methods = Object.keys(layer.route.methods).map(m => m.toUpperCase());
+      for (const method of methods) {
+        endpoints.push({ method, path: `/api${layer.route.path}` });
+      }
+    }
+  }
+  res.json({ endpoints });
+});
+
 router.get('/files', (req: Request, res: Response) => {
   const dir = (req.query.dir as string) || process.cwd();
   const entries = getDirectoryListing(dir);

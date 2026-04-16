@@ -222,7 +222,39 @@
   checkServices();
   setInterval(checkServices, 30000);
 
-  // (test buttons removed)
+  // ──── Backend Tools (dynamic) ────
+  async function fetchTools() {
+    try {
+      const res = await fetch(`${API}/tools`);
+      const d = await res.json();
+      const el = document.getElementById('backendTools');
+      if (!el) return;
+      el.innerHTML = d.tools.map(t => {
+        const badge = t.status === 'on'
+          ? '<span class="tool-sub accent">● ON</span>'
+          : t.status === 'ext'
+          ? '<span class="tool-sub">EXT</span>'
+          : '<span class="tool-sub dim">● OFF</span>';
+        return `<div class="tool-item"><span class="tool-name">${esc(t.name)}</span>${badge}</div>`;
+      }).join('');
+    } catch (e) { console.error('Tools fetch failed:', e); }
+  }
+  fetchTools();
+  setInterval(fetchTools, 30000);
+
+  // ──── API Endpoints (dynamic) ────
+  async function fetchEndpoints() {
+    try {
+      const res = await fetch(`${API}/endpoints`);
+      const d = await res.json();
+      const el = document.getElementById('apiEndpoints');
+      if (!el) return;
+      el.innerHTML = d.endpoints.map(ep =>
+        `<div class="info-item"><span class="fc-key">${esc(ep.method)}</span> ${esc(ep.path)}</div>`
+      ).join('');
+    } catch (e) { console.error('Endpoints fetch failed:', e); }
+  }
+  fetchEndpoints();
 
   // ──── Health Check ────
   document.getElementById('linkHealth').addEventListener('click', async (e) => {
