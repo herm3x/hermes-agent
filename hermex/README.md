@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <a href="https://x.com/herm3x"><img src="https://img.shields.io/badge/𝕏-@herm3x-000000?style=for-the-badge&logo=x&logoColor=white" alt="X @herm3x"></a>&nbsp;
+  <a href="https://x.com/herm3x_com"><img src="https://img.shields.io/badge/𝕏-@herm3x_com-000000?style=for-the-badge&logo=x&logoColor=white" alt="X @herm3x_com"></a>&nbsp;
   <a href="https://predict.fun"><img src="https://img.shields.io/badge/Predict.fun-Trade_Now-6366f1?style=for-the-badge" alt="Predict.fun"></a>&nbsp;
   <a href="https://github.com/herm3x/hermes-agent/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge" alt="MIT"></a>
 </p>
@@ -232,7 +232,7 @@ Add any handle via the **KOL Whitelist** in the extension popup.
 
 <p align="center">
   <img src="assets/hermex-eye.png" alt="Hermex" width="48"><br><br>
-  <a href="https://x.com/herm3x"><b>𝕏 @herm3x</b></a><br>
+  <a href="https://x.com/herm3x_com"><b>𝕏 @herm3x_com</b></a><br>
   <sub>Built with <a href="https://nousresearch.com">Hermes Agent</a> · <a href="https://predict.fun">Predict.fun</a></sub><br>
   <sub>MIT License</sub>
 </p>
