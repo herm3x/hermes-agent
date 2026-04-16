@@ -1139,151 +1139,90 @@ body::before {
 }
 .mock-stats span { white-space: nowrap; }
 
-/* ──── Standalone Download Hero Button ──── */
+/* ──── Download Button (matches mock-card aesthetic) ──── */
 .download-hero {
   position: relative;
-  display: block;
-  margin-top: 0;
-  margin-bottom: 14px;
-  padding: 13px 16px;
-  border-radius: 12px;
-  box-sizing: border-box;
-  width: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 2px;
+  padding: 11px 13px;
+  background: linear-gradient(145deg, rgba(15, 31, 58, 0.95), rgba(20, 40, 75, 0.9));
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  border-radius: 14px;
   text-decoration: none;
+  color: #e0ecff;
+  font-family: 'JetBrains Mono', monospace;
+  box-shadow: 0 8px 24px rgba(30, 64, 175, 0.25), 0 0 0 1px rgba(59, 130, 246, 0.08) inset;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  box-sizing: border-box;
   overflow: hidden;
-  cursor: pointer;
-  isolation: isolate;
-  border: 1px solid rgba(165, 180, 252, 0.45);
-  box-shadow:
-    0 14px 36px rgba(79, 70, 229, 0.45),
-    0 0 0 1px rgba(255, 255, 255, 0.06) inset,
-    0 1px 0 rgba(255, 255, 255, 0.25) inset,
-    0 -1px 0 rgba(0, 0, 0, 0.25) inset;
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
-  will-change: transform;
 }
-
-/* Animated gradient background */
-.download-hero .dh-bg {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    120deg,
-    #1e3a8a 0%,
-    #2563eb 22%,
-    #4f46e5 46%,
-    #7c3aed 72%,
-    #2563eb 100%
-  );
-  background-size: 280% 280%;
-  animation: dh-bg-shift 6s ease-in-out infinite;
-  z-index: -2;
-}
-@keyframes dh-bg-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-
-/* Floating orb glow */
-.download-hero .dh-orb {
-  position: absolute;
-  top: -40%;
-  left: -10%;
-  width: 60%;
-  height: 180%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0%, transparent 70%);
-  filter: blur(18px);
-  opacity: 0.6;
-  animation: dh-orb-move 5s ease-in-out infinite;
-  z-index: -1;
-  pointer-events: none;
-}
-@keyframes dh-orb-move {
-  0%, 100% { transform: translateX(0) scale(1); opacity: 0.45; }
-  50% { transform: translateX(140%) scale(1.1); opacity: 0.7; }
-}
-
-/* Shine sweep on hover */
 .download-hero::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    100deg,
-    transparent 20%,
-    rgba(255, 255, 255, 0.38) 50%,
-    transparent 80%
-  );
-  transform: translateX(-120%) skewX(-14deg);
-  transition: transform 0.9s cubic-bezier(0.3, 0, 0.3, 1);
-  z-index: 1;
+  background: radial-gradient(circle at 85% 50%, rgba(99, 102, 241, 0.14), transparent 60%);
+  pointer-events: none;
+  opacity: 0.8;
+}
+.download-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(147, 197, 253, 0.12) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform 0.7s ease;
   pointer-events: none;
 }
-
 .download-hero:hover {
-  transform: translateY(-3px);
-  box-shadow:
-    0 22px 48px rgba(79, 70, 229, 0.65),
-    0 0 0 1px rgba(255, 255, 255, 0.1) inset,
-    0 1px 0 rgba(255, 255, 255, 0.3) inset;
+  transform: translateY(-2px);
+  border-color: rgba(147, 197, 253, 0.55);
+  box-shadow: 0 14px 34px rgba(30, 64, 175, 0.4), 0 0 24px rgba(99, 102, 241, 0.25);
 }
-.download-hero:hover::before { transform: translateX(120%) skewX(-14deg); }
+.download-hero:hover::after { transform: translateX(120%); }
 .download-hero:active { transform: translateY(-1px); }
 
-/* Content row */
-.download-hero .dh-content {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-family: 'JetBrains Mono', monospace;
-  color: #fff;
-}
-
 .download-hero .dh-icon-wrap {
-  width: 34px;
-  height: 34px;
+  position: relative;
+  z-index: 1;
+  width: 26px;
+  height: 26px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 12px;
-  box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(8px);
-  animation: dh-icon-float 2.4s ease-in-out infinite;
-  color: #fff;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.28), rgba(99, 102, 241, 0.2));
+  border: 1px solid rgba(147, 197, 253, 0.35);
+  border-radius: 7px;
+  color: #93c5fd;
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.2);
 }
-@keyframes dh-icon-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(3px); }
-}
-
 .download-hero .dh-label {
+  position: relative;
+  z-index: 1;
   flex: 1;
-  font-size: 12px;
+  min-width: 0;
+  font-size: 10.5px;
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: 1.4px;
+  color: #e0ecff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35), 0 0 18px rgba(255, 255, 255, 0.25);
 }
-
 .download-hero .dh-arrow {
-  font-size: 14px;
-  font-weight: 700;
-  opacity: 0.75;
+  position: relative;
+  z-index: 1;
+  font-size: 13px;
+  color: #93c5fd;
+  opacity: 0.7;
   transition: transform 0.3s ease, opacity 0.3s ease;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 .download-hero:hover .dh-arrow {
-  transform: translateX(5px);
+  transform: translateX(4px);
   opacity: 1;
+  color: #bfdbfe;
 }
 
 .modal-option.primary {
