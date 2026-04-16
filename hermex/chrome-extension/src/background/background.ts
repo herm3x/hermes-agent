@@ -40,6 +40,9 @@ async function generateProposal(
   const config = await getConfig();
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
     const response = await fetch(`${config.apiUrl}/api/proposal`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -52,7 +55,10 @@ async function generateProposal(
           timestamp: tweetData.timestamp,
         },
       }),
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       throw new Error(`Backend returned ${response.status}`);

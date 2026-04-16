@@ -54,11 +54,21 @@ async function processTweet(tweet: TweetData): Promise<void> {
     if (response?.data) {
       updateCard(tweet.id, response.data as ProposalCardData);
     } else {
-      const card = document.querySelector(`[data-hermex-card="${tweet.id}"]`);
-      if (card) card.remove();
+      updateCard(tweet.id, {
+        proposal: null as any,
+        tweetId: tweet.id,
+        status: 'error',
+        errorMessage: 'Could not reach Hermex backend',
+      });
     }
   } catch (err) {
     console.error('[Hermex] processTweet error:', err);
+    updateCard(tweet.id, {
+      proposal: null as any,
+      tweetId: tweet.id,
+      status: 'error',
+      errorMessage: err instanceof Error ? err.message : 'Unexpected error',
+    });
   }
 }
 

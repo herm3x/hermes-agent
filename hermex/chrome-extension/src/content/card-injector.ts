@@ -56,7 +56,12 @@ export function updateCard(tweetId: string, data: ProposalCardData): void {
   card.className = 'hermex-card';
 
   if (data.status === 'error') {
-    (card as HTMLElement).remove();
+    card.className = 'hermex-card hermex-error';
+    card.innerHTML = buildErrorCard(data.errorMessage || 'Failed to generate proposal');
+    const retryBtn = card.querySelector('.hermex-retry-btn');
+    retryBtn?.addEventListener('click', () => {
+      (card as HTMLElement).remove();
+    });
     return;
   }
 
@@ -169,13 +174,25 @@ function buildProposalCard(
 }
 
 function buildErrorCard(message: string): string {
+  const logoUrl = getLogoUrl();
+  const logoPng = getLogoPngUrl();
   return `
     <div class="hermex-card-header">
-      <span class="hermex-logo">☤ Hermex</span>
-      <span class="hermex-badge hermex-error-badge">Error</span>
+      <div class="hermex-header-left">
+        <div class="hermex-logo-wrap">
+          <img src="${logoUrl}" onerror="this.src='${logoPng}'" alt="" class="hermex-logo-img">
+          <div class="hermex-logo-glow"></div>
+        </div>
+        <pre class="hermex-ascii-name">╦ ╦ ╔═╗ ╦═╗ ╔╦╗ ╔═╗ ═╗ ╦
+╠═╣ ║╣  ╠╦╝ ║║║ ║╣  ╔╩╦╝
+╩ ╩ ╚═╝ ╩╚═ ╩ ╩ ╚═╝ ╩ ╚═</pre>
+      </div>
+      <span class="hermex-badge hermex-error-badge">OFFLINE</span>
     </div>
     <div class="hermex-card-body hermex-error-body">
-      <p>${escapeHtml(message)}</p>
+      <p class="hermex-error-msg">${escapeHtml(message)}</p>
+      <p class="hermex-error-hint">Check extension settings → Backend API URL</p>
+      <button class="hermex-btn hermex-btn-secondary hermex-retry-btn">DISMISS</button>
     </div>
   `;
 }

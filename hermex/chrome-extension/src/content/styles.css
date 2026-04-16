@@ -466,12 +466,32 @@
 }
 
 /* ──── Error ──── */
-.hermex-error-body {
-  padding: 12px 14px;
+.hermex-error {
+  border-color: rgba(255, 107, 138, 0.2);
 }
-
-.hermex-error-body p {
+.hermex-error-badge {
+  background: linear-gradient(135deg, #ff99b0, #ff6b8a) !important;
+  color: #3a1a25 !important;
+  border-color: rgba(255, 107, 138, 0.6) !important;
+}
+.hermex-error-body {
+  padding: 14px 16px;
+  text-align: center;
+}
+.hermex-error-msg {
   color: #ff6b8a;
-  font-size: 10px;
-  margin: 0;
+  font-size: 11px;
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+.hermex-error-hint {
+  color: #506888;
+  font-size: 9.5px;
+  margin: 0 0 12px;
+}
+.hermex-retry-btn {
+  margin: 0 auto;
+  display: inline-block;
+  font-size: 9px;
+  padding: 5px 16px;
 }
