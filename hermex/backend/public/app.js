@@ -308,6 +308,53 @@
   // ──── Live Feed Markets ────
   const marketsRow = document.getElementById('marketsRow');
   const marketsCountEl = document.getElementById('marketsCount');
+  const marketsPrev = document.getElementById('marketsPrev');
+  const marketsNext = document.getElementById('marketsNext');
+  const marketsDots = document.getElementById('marketsDots');
+  const marketsViewport = marketsRow ? marketsRow.parentElement : null;
+
+  function updateSliderState() {
+    if (!marketsRow || !marketsViewport) return;
+    const maxScroll = marketsRow.scrollWidth - marketsRow.clientWidth;
+    const cur = marketsRow.scrollLeft;
+    const hasPrev = cur > 4;
+    const hasNext = cur < maxScroll - 4;
+    marketsViewport.classList.toggle('has-prev', hasPrev);
+    marketsViewport.classList.toggle('has-next', hasNext);
+    if (marketsPrev) marketsPrev.disabled = !hasPrev;
+    if (marketsNext) marketsNext.disabled = !hasNext;
+    if (marketsDots && currentMarkets.length) {
+      const cardWidth = 340 + 14;
+      const idx = Math.round(cur / cardWidth);
+      marketsDots.querySelectorAll('.markets-dot').forEach((d, i) => {
+        d.classList.toggle('active', i === idx);
+      });
+    }
+  }
+
+  function renderDots(count) {
+    if (!marketsDots) return;
+    marketsDots.innerHTML = Array.from({ length: count }).map((_, i) =>
+      `<button class="markets-dot${i === 0 ? ' active' : ''}" data-idx="${i}" aria-label="Go to market ${i + 1}"></button>`
+    ).join('');
+    marketsDots.querySelectorAll('.markets-dot').forEach(dot => {
+      dot.addEventListener('click', () => {
+        const idx = parseInt(dot.dataset.idx, 10);
+        const cardWidth = 340 + 14;
+        marketsRow.scrollTo({ left: idx * cardWidth, behavior: 'smooth' });
+      });
+    });
+  }
+
+  function slideBy(dir) {
+    if (!marketsRow) return;
+    const cardWidth = 340 + 14;
+    marketsRow.scrollBy({ left: dir * cardWidth, behavior: 'smooth' });
+  }
+  if (marketsPrev) marketsPrev.addEventListener('click', () => slideBy(-1));
+  if (marketsNext) marketsNext.addEventListener('click', () => slideBy(1));
+  if (marketsRow) marketsRow.addEventListener('scroll', updateSliderState, { passive: true });
+  window.addEventListener('resize', updateSliderState);
 
   function fmtUSD(n) {
     if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(1) + 'M';
@@ -354,7 +401,7 @@
             </div>
             <div class="mk-change ${chgCls}">${chgArrow} ${Math.abs(chg).toFixed(1)}%</div>
           </div>
-          <div class="mk-tweet">${esc(m.tweet)}</div>
+          <div class="mk-tweet" title="${esc(m.tweet)}">${esc(m.tweet)}</div>
           <div class="mk-question">${esc(m.question)}</div>
           <div class="mk-bars">
             <div class="mk-bar yes" style="--pct:${yesPct}%">
@@ -390,6 +437,9 @@
         });
       });
     });
+
+    renderDots(markets.length);
+    requestAnimationFrame(updateSliderState);
   }
 
   async function fetchFeedMarkets() {

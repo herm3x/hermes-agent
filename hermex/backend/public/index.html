@@ -162,6 +162,23 @@
         </div>
       </div>
 
+      <!-- Logs (moved from center) -->
+      <div class="panel logs-panel logs-panel-side">
+        <div class="panel-header">
+          <div class="log-tabs">
+            <button class="tab active">ALL</button>
+            <button class="tab" id="tabErrors">ERR</button>
+            <button class="tab" id="tabLLM">LLM</button>
+            <button class="tab" id="tabApi">API</button>
+          </div>
+          <div class="log-controls">
+            <span class="badge green">● LIVE</span>
+            <span class="badge" id="logCount">0</span>
+          </div>
+        </div>
+        <div class="logs-body" id="logsBody"></div>
+      </div>
+
     </aside>
 
     <!-- CENTER -->
@@ -175,13 +192,20 @@
           <span class="header-badges">
             <span class="badge green">● LIVE</span>
             <span class="badge" id="marketsCount">0</span>
+            <button class="slider-nav" id="marketsPrev" aria-label="Previous" disabled>‹</button>
+            <button class="slider-nav" id="marketsNext" aria-label="Next">›</button>
           </span>
         </div>
-        <div class="markets-row" id="marketsRow">
-          <div class="market-skeleton"><div class="sk-shimmer"></div></div>
-          <div class="market-skeleton"><div class="sk-shimmer"></div></div>
-          <div class="market-skeleton"><div class="sk-shimmer"></div></div>
+        <div class="markets-viewport">
+          <div class="markets-row" id="marketsRow">
+            <div class="market-skeleton"><div class="sk-shimmer"></div></div>
+            <div class="market-skeleton"><div class="sk-shimmer"></div></div>
+            <div class="market-skeleton"><div class="sk-shimmer"></div></div>
+          </div>
+          <div class="markets-fade left"></div>
+          <div class="markets-fade right"></div>
         </div>
+        <div class="markets-dots" id="marketsDots"></div>
       </div>
 
       <!-- Bet Modal -->
@@ -275,22 +299,6 @@
         </div>
       </div>
 
-      <!-- Logs Bar -->
-      <div class="panel logs-panel">
-        <div class="panel-header">
-          <div class="log-tabs">
-            <button class="tab active">ALL LOGS</button>
-            <button class="tab" id="tabErrors">ERRORS</button>
-            <button class="tab" id="tabLLM">LLM</button>
-            <button class="tab" id="tabApi">API</button>
-          </div>
-          <div class="log-controls">
-            <span class="badge green">● LIVE</span>
-            <span class="badge" id="logCount">0</span>
-          </div>
-        </div>
-        <div class="logs-body" id="logsBody"></div>
-      </div>
     </main>
 
     <!-- RIGHT SIDEBAR -->
