@@ -3669,3 +3669,48 @@ body.docs-body { overflow-y: auto; }
 .ca-addr {
   opacity: 0.9;
 }
+
+/* ============================================================
+   Footer logos — bottom-left corner, hover float animation
+   ============================================================ */
+.footer-logos {
+  position: fixed;
+  bottom: 14px;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 50;
+  pointer-events: auto;
+}
+.footer-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  object-fit: cover;
+  opacity: 0.55;
+  filter: grayscale(0.3);
+  transition: opacity 0.35s ease, transform 0.35s ease, filter 0.35s ease, box-shadow 0.35s ease;
+  cursor: default;
+}
+.footer-logo:hover {
+  opacity: 1;
+  filter: grayscale(0);
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(91, 154, 255, 0.2), 0 0 8px rgba(91, 154, 255, 0.1);
+}
+@keyframes footerFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+.footer-logo:hover {
+  animation: footerFloat 2s ease-in-out infinite;
+  opacity: 1;
+  filter: grayscale(0);
+  box-shadow: 0 6px 20px rgba(91, 154, 255, 0.2), 0 0 8px rgba(91, 154, 255, 0.1);
+}
+
+@media (max-width: 600px) {
+  .footer-logos { bottom: 10px; left: 10px; gap: 8px; }
+  .footer-logo { width: 26px; height: 26px; border-radius: 6px; }
+}
