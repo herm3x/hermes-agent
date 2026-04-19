@@ -3671,33 +3671,34 @@ body.docs-body { overflow-y: auto; }
 }
 
 /* ============================================================
-   Footer logos — bottom-left corner, hover float animation
+   Site Footer — full-width bar at page bottom
    ============================================================ */
-.footer-logos {
-  position: fixed;
-  bottom: 14px;
-  left: 14px;
+.site-footer {
   display: flex;
   align-items: center;
-  gap: 10px;
-  z-index: 50;
-  pointer-events: auto;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: rgba(6, 12, 24, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(91, 154, 255, 0.1);
+  position: relative;
+  z-index: 10;
+}
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 .footer-logo {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 8px;
   object-fit: cover;
-  opacity: 0.55;
+  opacity: 0.5;
   filter: grayscale(0.3);
   transition: opacity 0.35s ease, transform 0.35s ease, filter 0.35s ease, box-shadow 0.35s ease;
   cursor: default;
-}
-.footer-logo:hover {
-  opacity: 1;
-  filter: grayscale(0);
-  transform: translateY(-4px);
-  box-shadow: 0 6px 20px rgba(91, 154, 255, 0.2), 0 0 8px rgba(91, 154, 255, 0.1);
 }
 @keyframes footerFloat {
   0%, 100% { transform: translateY(0); }
@@ -3709,8 +3710,19 @@ body.docs-body { overflow-y: auto; }
   filter: grayscale(0);
   box-shadow: 0 6px 20px rgba(91, 154, 255, 0.2), 0 0 8px rgba(91, 154, 255, 0.1);
 }
+.footer-right {
+  display: flex;
+  align-items: center;
+}
+.footer-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: rgba(203, 213, 225, 0.35);
+  letter-spacing: 0.5px;
+}
 
 @media (max-width: 600px) {
-  .footer-logos { bottom: 10px; left: 10px; gap: 8px; }
-  .footer-logo { width: 26px; height: 26px; border-radius: 6px; }
+  .site-footer { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+  .footer-logo { width: 24px; height: 24px; border-radius: 6px; }
+  .footer-text { font-size: 8px; }
 }
