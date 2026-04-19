@@ -3584,3 +3584,88 @@ body.docs-body { overflow-y: auto; }
   flex-shrink: 0 !important;
   overflow: visible !important;
 }
+
+/* ============================================================
+   X accounts dropdown (top-left nav)
+   ============================================================ */
+.x-dropdown-wrap {
+  position: relative;
+  display: inline-flex;
+}
+.x-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 160px;
+  background: rgba(10, 18, 32, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(91, 154, 255, 0.2);
+  border-radius: 10px;
+  padding: 6px;
+  z-index: 999;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 12px rgba(91, 154, 255, 0.08);
+  animation: xDropIn 0.15s ease-out;
+}
+.x-dropdown.open { display: flex; flex-direction: column; gap: 2px; }
+@keyframes xDropIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.x-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  color: #cbd5e1;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 7px;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.x-dropdown-item:hover {
+  background: rgba(91, 154, 255, 0.12);
+  color: #e0ecff;
+}
+.x-dropdown-item svg { opacity: 0.6; flex-shrink: 0; }
+.x-dropdown-item:hover svg { opacity: 1; }
+
+/* ============================================================
+   Profile card — pump.fun CA link
+   ============================================================ */
+.profile-ca {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+  padding: 4px 10px;
+  background: rgba(91, 154, 255, 0.08);
+  border: 1px solid rgba(91, 154, 255, 0.15);
+  border-radius: 8px;
+  color: #8bb8ff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  text-decoration: none;
+  letter-spacing: 0.4px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.profile-ca:hover {
+  background: rgba(91, 154, 255, 0.18);
+  border-color: rgba(91, 154, 255, 0.35);
+  color: #b8d4ff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(91, 154, 255, 0.15);
+}
+.ca-icon {
+  font-size: 12px;
+  color: #9945FF;
+}
+.ca-addr {
+  opacity: 0.9;
+}
