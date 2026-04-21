@@ -10,7 +10,7 @@
   "host_permissions": [
     "https://x.com/*",
     "https://twitter.com/*",
-    "https://herm3x.com/*",
+    "https://herm3x.xyz/*",
     "http://localhost:*/*"
   ],
   "background": {

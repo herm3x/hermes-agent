@@ -4,7 +4,7 @@
 ;// ./src/types/index.ts
 const DEFAULT_CONFIG = {
     enabled: true,
-    apiUrl: 'https://herm3x.com',
+    apiUrl: 'https://herm3x.xyz',
     useTestnet: true,
     autoPropose: true,
     kolWhitelist: [],

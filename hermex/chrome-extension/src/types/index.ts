@@ -69,7 +69,7 @@ export interface HermexConfig {
 
 export const DEFAULT_CONFIG: HermexConfig = {
   enabled: true,
-  apiUrl: 'https://herm3x.com',
+  apiUrl: 'https://herm3x.xyz',
   useTestnet: true,
   autoPropose: true,
   kolWhitelist: [],
